@@ -1,0 +1,136 @@
+name: Visual C++ Compile
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    name: Build
+
+    strategy:
+      matrix:
+        os: [windows-2019, windows-2016]
+        vc: [2019, 2017, 6]
+        # we use 'vc' just as variable, don't run invalid combinations
+        exclude:
+          - os: windows-2016
+            vc: 2017
+          - os: windows-2016
+            vc: 2019
+          - os: windows-2019
+            vc: 2017
+          - os: windows-2019
+            vc: 2019
+          - os: windows-2016
+            vc: 6
+      fail-fast: false
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout Application
+        uses: actions/checkout@v1
+
+      - name: Checkout 'GitHubActions'
+        uses: actions/checkout@v1
+        with:
+          repository: the-sz/GitHubActions
+          ref: master
+          token: ${{ secrets.token }}
+          path: GitHubActions
+
+      - name: Checkout Libraries
+        shell: cmd
+        run: |
+              python ..\GitHubActions\checkout.py "${{secrets.token}}" "*defaults*"
+              python ..\GitHubActions\checkout.py "${{secrets.token}}" "*defaults_app*"
+              python ..\GitHubActions\checkout.py "${{secrets.token}}" "ModBus"
+
+      - name: Compile
+        if: matrix.vc != '6'
+        shell: cmd
+        run: |
+              echo Compile with Visual Studio ${{ matrix.vc }}
+              call ..\GitHubActions\VC20xx\build.bat ${{ matrix.vc }} .\VC.${{ matrix.vc }}\Hayman.sln debug x64
+              call ..\GitHubActions\VC20xx\build.bat ${{ matrix.vc }} .\VC.${{ matrix.vc }}\Hayman.sln release x64
+              call ..\GitHubActions\VC20xx\build.bat ${{ matrix.vc }} .\VC.${{ matrix.vc }}\Hayman.sln debug x86
+              call ..\GitHubActions\VC20xx\build.bat ${{ matrix.vc }} .\VC.${{ matrix.vc }}\Hayman.sln release x86
+
+      - name: Compile
+        if: matrix.vc == '6'
+        shell: cmd
+        run: |
+              echo Compile with Visual Studio ${{ matrix.vc }}
+              python ..\GitHubActions\VC6\prepare.py ".\\Hayman.dsw"
+              call ..\GitHubActions\VC6\build.bat ".\\Hayman.dsw" "Hayman - Win32 Debug"
+              call ..\GitHubActions\VC6\build.bat ".\\Hayman.dsw" "Hayman - Win32 Debug Unicode"
+              call ..\GitHubActions\VC6\build.bat ".\\Hayman.dsw" "Hayman - Win32 Release"
+              call ..\GitHubActions\VC6\build.bat ".\\Hayman.dsw" "Hayman - Win32 Release Unicode"
+
+      - name: Collect Artifacts
+        # collect Artifacts folder for 'Upload Artifacts' step
+        # create zip file for 'Upload Release Asset' step
+        shell: cmd
+        run: |
+              python ..\GitHubActions\collect.py "Hayman.exe" "Artifacts${{ matrix.vc }}.zip"
+
+      - name: Upload Artifacts
+        # create artifact from all files in 'Artifacts' folder
+        uses: actions/upload-artifact@master
+        with:
+          name: Artifacts${{ matrix.vc }}
+          path: .\Artifacts
+
+      #- name: Create Release
+      #  id: create_release
+      #  uses: actions/create-release@v1.0.0
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.token }}
+      #  with:
+      #    tag_name: ${{ matrix.vc }}-${{ github.sha }}
+      #    release_name: ${{ matrix.vc }} - ${{ github.sha }}
+      #    draft: true
+      #    prerelease: false
+
+      #- name: Upload Release Asset
+      #  # upload Artifacts.zip file
+      #  id: upload-release-asset
+      #  uses: actions/upload-release-asset@v1.0.1
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.token }}
+      #  with:
+      #    upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+      #    asset_path: .\Artifacts${{ matrix.vc }}.zip
+      #    asset_name: Artifacts${{ matrix.vc }}.zip
+      #    asset_content_type: application/zip
+
+  notify:
+    needs: build
+    name: Send Notification Mail
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        vc: [2019, 2017, 6]
+        exclude:
+          # disabled until we need a 2019 build
+          - vc: 2017
+          - vc: 2019
+
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@master
+        with:
+          name: Artifacts${{ matrix.vc }}
+          path: ./Artifacts
+
+      - name: Checkout 'GitHubActions'
+        uses: actions/checkout@v1
+        with:
+          repository: the-sz/GitHubActions
+          ref: master
+          token: ${{ secrets.token }}
+          path: GitHubActions
+
+      - name: Process Log Files
+        run: |
+              sh ../GitHubActions/process.sh ${GITHUB_REPOSITORY} ${{ matrix.vc }}

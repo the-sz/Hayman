@@ -1,0 +1,290 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "Resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+#include "Application.Manifest.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// German (Germany) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
+#ifdef _WIN32
+LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,3,0,1
+ PRODUCTVERSION 1,3,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x21L
+#else
+ FILEFLAGS 0x20L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040704b0"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "the sz development\0"
+            VALUE "FileDescription", "Hayman\0"
+            VALUE "FileVersion", "1.30\0"
+            VALUE "InternalName", "Hayman\0"
+            VALUE "LegalCopyright", "Copyright © 2013-2025\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "Hayman.exe\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "the sz development Hayman\0"
+            VALUE "ProductVersion", "1.30\0"
+            VALUE "SpecialBuild", "The SZ\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x407, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "Resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "#include ""Application.Manifest.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_MAIN DIALOG DISCARDABLE  0, 0, 526, 300
+STYLE DS_CENTER | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | 
+    WS_CLIPCHILDREN | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Dialog"
+FONT 8, "MS Sans Serif"
+BEGIN
+    COMBOBOX        IDC_COMBO_COMMAND,45,25,200,310,CBS_DROPDOWN | 
+                    CBS_OWNERDRAWVARIABLE | CBS_HASSTRINGS | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "List1",IDC_LIST_VIEW,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_NOSORTHEADER | WS_BORDER | 
+                    WS_TABSTOP,5,65,515,230
+    LTEXT           "Command",IDC_COMMAND_INFO,5,25,35,12,SS_CENTERIMAGE
+    LTEXT           "Payload",IDC_PAYLOAD_INFO,255,25,35,12,SS_CENTERIMAGE
+    CTEXT           "Static",IDC_LINK,320,5,71,14,SS_CENTERIMAGE
+    ICON            IDI_EXCLAMATION_MARK,IDC_ERROR_ICON,6,47,20,20,
+                    SS_REALSIZEIMAGE
+    LTEXT           "Static",IDC_INFO_TEXT,19,45,501,14,SS_CENTERIMAGE
+    ICON            IDI_INFO,IDC_INFO_ICON,6,47,20,20,SS_REALSIZEIMAGE
+    COMBOBOX        IDC_COMBO_PAYLOAD,295,25,225,310,CBS_DROPDOWN | 
+                    CBS_OWNERDRAWVARIABLE | CBS_HASSTRINGS | WS_VSCROLL | 
+                    WS_TABSTOP
+END
+
+IDD_OPTIONS DIALOG DISCARDABLE  0, 0, 274, 132
+STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Serial Port",IDC_DEVICE_LIST_INFO,10,10,52,14,
+                    SS_CENTERIMAGE
+    COMBOBOX        IDC_DEVICE_LIST,80,10,185,112,CBS_DROPDOWNLIST | 
+                    CBS_OWNERDRAWVARIABLE | CBS_HASSTRINGS | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "Refresh Rate",IDC_REFRESH_RATE_INFO,10,35,65,14,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_REFRESH_RATE,80,35,60,14,ES_AUTOHSCROLL
+    LTEXT           "ms",IDC_REFRESH_RATE_MS,143,35,20,14,SS_CENTERIMAGE
+    CONTROL         "Start polling on program start",IDC_CHECK_AUTO_START,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,60,250,14
+    CONTROL         "Automatically check for updates",IDC_CHECK_AUTO_UPDATE,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,85,250,14
+    DEFPUSHBUTTON   "OK",IDC_OK,140,110,60,14
+    PUSHBUTTON      "Cancel",IDC_CANCEL,205,110,60,14
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_APP                 ICON    DISCARDABLE     "_Resources\\App.ico"
+IDI_STOP                ICON    DISCARDABLE     "_Resources\\Stop.ico"
+IDI_OPTIONS             ICON    DISCARDABLE     "_Resources\\Options.ico"
+IDI_START               ICON    DISCARDABLE     "_Resources\\Start.ico"
+IDI_EXCLAMATION_MARK    ICON    DISCARDABLE     "_Resources\\ExclamationMark.ico"
+IDI_SERIAL_PORT         ICON    DISCARDABLE     "_Resources\\SerialPort.ico"
+IDI_SAVE                ICON    DISCARDABLE     "_Resources\\Save.ico"
+IDI_DEVICE              ICON    DISCARDABLE     "_Resources\\Device.ico"
+IDI_INFO                ICON    DISCARDABLE     "_Resources\\Info.ico"
+IDI_LOG                 ICON    DISCARDABLE     "_Resources\\Log.ico"
+IDI_MRU                 ICON    DISCARDABLE     "_Resources\\MRU.ico"
+IDI_COMMAND             ICON    DISCARDABLE     "_Resources\\Command.ico"
+IDI_DOT_YELLOW          ICON    DISCARDABLE     "_Resources\\DotYellow.ico"
+IDI_DOT_BLUE            ICON    DISCARDABLE     "_Resources\\DotBlue.ico"
+IDI_DOT_GREEN           ICON    DISCARDABLE     "_Resources\\DotGreen.ico"
+IDI_DOT_RED             ICON    DISCARDABLE     "_Resources\\DotRed.ico"
+IDI_SEND_COMMAND        ICON    DISCARDABLE     "_Resources\\SendCommand.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_MAIN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 520
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 293
+    END
+
+    IDD_OPTIONS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 267
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 125
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// 24
+//
+
+IDR_RT_MANIFEST         24      DISCARDABLE     "Application.manifest.xml"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Cursor
+//
+
+IDC_MY_HAND             CURSOR  DISCARDABLE     "_Resources\\Hand_Own.cur"
+#endif    // German (Germany) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.K.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_COMMAND             "Command"
+    IDS_PAYLOAD             "Payload"
+    IDS_COMMAND_FAILED      "Command failed"
+    IDS_FILTER_SAVE         "CSV Format|*.csv|XML Format|*.xml||"
+    IDS_SELECT_CURRENT_VALUES "Please select file to save current values"
+    IDS_ERROR_OPEN          "Can't open connection..."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_ALIAS               "Alias"
+    IDS_OPTIONS             "Options"
+    IDS_SAVE                "Save Values"
+    IDS_POLLING             "Polling"
+    IDS_STOP                "Stop"
+    IDS_SELECT              "Select"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_DEVICE_LIST         "Serial Port"
+    IDS_REFRESH_RATE        "Refresh Rate"
+    IDS_REFRESH_RATE_MS     "ms"
+    IDS_CHECK_AUTO_START    "Start polling on program start"
+    IDS_CHECK_AUTO_UPDATE   "Automatically check for updates"
+    IDS_OK                  "OK"
+    IDS_CANCEL              "Cancel"
+    IDS_USE_LAST_DEVICE     "Use last device from list"
+    IDS_STATISTIC           "Success %1!u! - Fail %2!u!"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_LOG                 "Write to Log File"
+    IDS_FILTER_LOG          "CSV Format|*.csv||"
+    IDS_SELECT_LOG_FILE     "Please select log file"
+    IDS_NAME                "Name"
+    IDS_VALUE               "Value"
+    IDS_SEND_COMMAND        "Send Command"
+END
+
+#endif    // English (U.K.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
