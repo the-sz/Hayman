@@ -43,7 +43,7 @@ jobs:
         run: |
               python ..\GitHubActions\checkout.py "${{secrets.token}}" "*defaults*"
               python ..\GitHubActions\checkout.py "${{secrets.token}}" "*defaults_app*"
-              python ..\GitHubActions\checkout.py "${{secrets.token}}" "ModBus"
+              python ..\GitHubActions\checkout.py "${{secrets.token}}" "HART"
 
       - name: Compile
         if: matrix.vc != '6'
