@@ -15,7 +15,6 @@
 #include <_C_SerialPort.h>
 #include <_C_ThreadEngine.h>
 #include <_C_Color.h>
-#include <_C_DataBase.h>
 #include <_C_StringTable.h>
 #include <_C_Time.h>
 #include <_C_CommandLine.h>
@@ -28,7 +27,6 @@
 
 #include "C_Engine.h"
 #include "C_Options.h"
-#include "C_DataBase.h"
 
 #include "Resource.h"
 
@@ -74,9 +72,6 @@ class C_Hayman : public _C_AppDialog
 		_C_AlignContainer										AlignContainer;
 		_C_ImageList											ImageList;
 		C_Options												Options;
-		C_DataBase												DataBase;
-//XXX draw graph
-		UINT														uiCurrentCycle;
 		_C_Log													Log;
 		BYTE														bReceiveBuffer[100];
 		UINT														uiReceiveBufferLength;
@@ -92,8 +87,13 @@ class C_Hayman : public _C_AppDialog
 		void DecodeCommand(WORD wCommand, _C_String *pCommand);
 		void DecodeResponseCode(BYTE bResponseCode, _C_String *pResponseCode);
 		FLOAT DecodeFloat(BYTE *pbBuffer);
+		void DecodePackedString(BYTE *pbBuffer, _C_String *pString);
+		void DecodePayloadCommandUnknown(UINT uiOffset);
 		void DecodePayloadCommand0(UINT uiOffset);
+		void DecodePayloadCommand1(UINT uiOffset);
 		void DecodePayloadCommand2(UINT uiOffset);
+		void DecodePayloadCommand3(UINT uiOffset);
+		void DecodePayloadCommand13(UINT uiOffset);
 		void Polling(void);
 
 	public:
@@ -104,8 +104,6 @@ class C_Hayman : public _C_AppDialog
 		C_Engine													Engine;
 		_C_StringTable											StringTable;
 		BOOL														bPolling;
-//XXX draw graph
-		UINT														uiLastFunction;
 
 		void SendCommand(void);
 		void UpdateResponse(BOOL bResult);

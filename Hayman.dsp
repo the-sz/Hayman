@@ -160,10 +160,6 @@ SOURCE=..\_Include\_PCH.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\C_DataBase.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\C_Engine.cpp
 # End Source File
 # Begin Source File
@@ -442,10 +438,6 @@ SOURCE=..\_SDKs\Windows\_DDK7\inc\api\wincodec.h
 SOURCE=..\_SDKs\Windows\_SDK7\Include\winhttp.h
 # End Source File
 # End Group
-# Begin Source File
-
-SOURCE=.\C_DataBase.h
-# End Source File
 # Begin Source File
 
 SOURCE=.\C_Engine.h

@@ -64,6 +64,29 @@ FLOAT C_Hayman::DecodeFloat(BYTE *pbBuffer)
 	return *(FLOAT *)&bArray;
 }
 
+void C_Hayman::DecodePackedString(BYTE *pbBuffer, _C_String *pString)
+{
+	const CHAR			cPackedAscii[64] = { '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '[', '\\', ']', '^', '_', ' ', '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?' };
+	BYTE					bValue;
+
+	//               |-----------|-----------|-----------|-----------|
+	//Bits packed    |5 4 3 2 1 0|5 4 3 2 1 0|5 4 3 2 1 0|5 4 3 2 1 0|
+	//Bits unpacked  |7 6 5 4 3 2 1 0|7 6 5 4 3 2 1 0|7 6 5 4 3 2 1 0|
+	//               |---------------|---------------|---------------|
+
+	bValue = (BYTE)((pbBuffer[0] & 0xFC) >> 2);
+	pString->Add(cPackedAscii[bValue]);
+
+	bValue = (BYTE)(((pbBuffer[0] & 0x03) << 4) | ((pbBuffer[1] & 0xF0) >> 4));
+	pString->Add(cPackedAscii[bValue]);
+
+	bValue = (BYTE)(((pbBuffer[1] & 0x0F) << 2) | ((pbBuffer[2] & 0xC0) >> 6));
+	pString->Add(cPackedAscii[bValue]);
+
+	bValue = (BYTE)(pbBuffer[2] & 0x3F);
+	pString->Add(cPackedAscii[bValue]);
+}
+
 void C_Hayman::DecodeManufacturerAndDevice(WORD wManufacturer, WORD wDeviceType, _C_String *pManufacturer, _C_String *pDeviceType)
 {
 	TCHAR				*pszManufacturer;
@@ -114,20 +137,32 @@ void C_Hayman::DecodeCommand(WORD wCommand, _C_String *pCommand)
 
 	switch (wCommand)
 	{
-		case 0:		pszCommand = _T("Read Transmitter Unique Identifier");					break;
+		// Spec127.pdf
+		case 0:		pszCommand = _T("Read Unique Identifier");									break;
 		case 1:		pszCommand = _T("Read Primary Variable");										break;
-		case 2:		pszCommand = _T("Read Current and Percent of Range");						break;
-		case 3:		pszCommand = _T("Read all dynamic Variables and Current");				break;
+		case 2:		pszCommand = _T("Read Loop Current And Percent Of Range");				break;
+		case 3:		pszCommand = _T("Read Dynamic Variables And Loop Current");				break;
 		case 6:		pszCommand = _T("Write Polling Address");										break;
+		case 7:		pszCommand = _T("Read Loop Configuration");									break;
+		case 8:		pszCommand = _T("Read Dynamic Variable Classifications");				break;
+		case 9:		pszCommand = _T("Read Device Variables with Status");						break;
 		case 11:		pszCommand = _T("Read Unique Identifier Associated With Tag");			break;
 		case 12:		pszCommand = _T("Read Message");													break;
 		case 13:		pszCommand = _T("Read Tag, Descriptor, Date");								break;
 		case 14:		pszCommand = _T("Read Primary Variable Sensor Information");			break;
-		case 15:		pszCommand = _T("Read Primary Variable Output Information");			break;
+		case 15:		pszCommand = _T("Read Device Information");									break;
 		case 16:		pszCommand = _T("Read Final Assembly Number");								break;
 		case 17:		pszCommand = _T("Write Message");												break;
 		case 18:		pszCommand = _T("Write Tag, Descriptor, Date");								break;
 		case 19:		pszCommand = _T("Write Final Assembly Number");								break;
+		case 20:		pszCommand = _T("Read Long Tag");												break;
+		case 21:		pszCommand = _T("Read Unique Identifier Associated With Long Tag");	break;
+		case 22:		pszCommand = _T("Write Long Tag");												break;
+		case 38:		pszCommand = _T("Reset Configuration Changed Flag");						break;
+		case 48:		pszCommand = _T("Read Additional Device Status");							break;
+
+		// Spec151.pdf
+		case 72:		pszCommand = _T("Squawk");															break;
 	}
 
 	if (pszCommand != NULL)
@@ -148,12 +183,56 @@ void C_Hayman::DecodeResponseCode(BYTE bResponseCode, _C_String *pResponseCode)
 		case 0:		pszResponseCode = _T("Success");													break;
 		case 5:		pszResponseCode = _T("Too Few Data Bytes Received");						break;
 		case 16:		pszResponseCode = _T("Access Restricted");									break;
+		case 64:		pszResponseCode = _T("Command not implemented");							break;
 	}
 
 	if (pszResponseCode != NULL)
 		pResponseCode->Printf(_T("%u - %s"), bResponseCode, pszResponseCode);
 	else
 		pResponseCode->Printf(_T("%u"), bResponseCode);
+}
+
+void C_Hayman::DecodePayloadCommandUnknown(UINT uiOffset)
+{
+	_C_String							Buffer;
+	_C_String							Temp;
+	UINT									uiLength;
+	UINT									uiIndex;
+
+	uiLength = uiReceiveBufferLength - uiOffset - 1;
+
+	// if everything is ascii, dump it
+	Buffer = _T("");
+	for (uiIndex = uiOffset; uiIndex < (uiReceiveBufferLength - 1); uiIndex++)
+	{
+		if ((bReceiveBuffer[uiIndex] < ' ') || (bReceiveBuffer[uiIndex] > 0x7F))
+			break;
+
+		Buffer.Add((CHAR)bReceiveBuffer[uiIndex]);
+	}
+	if (uiIndex != uiOffset)														// non zero length payload
+		if (uiIndex == (uiReceiveBufferLength - 1))							// full buffer only ascii chars
+			ListViewAdd(_T("Payload as String"), Buffer.Get(), 1);
+
+	// if multiple of 4, dump content as hex / dec and float
+	if ((uiLength % 4) == 0)
+	{
+		uiIndex = 1;
+		while (uiOffset < (uiReceiveBufferLength - 1))
+		{
+			Buffer.Printf(_T("0x%08X / %u / %.3f"),
+								DWORD_SWAP_ENDIAN(*(DWORD *)&bReceiveBuffer[uiOffset]),
+								DWORD_SWAP_ENDIAN(*(DWORD *)&bReceiveBuffer[uiOffset]),
+								DecodeFloat(&bReceiveBuffer[uiOffset]));
+
+			Temp.Printf(_T("Payload as Value %u"), uiIndex);
+
+			ListViewAdd(Temp.Get(), Buffer.Get(), 1);
+
+			uiIndex++;
+			uiOffset += sizeof(DWORD);
+		}
+	}
 }
 
 // Spec127.pdf page 12
@@ -179,17 +258,17 @@ void C_Hayman::DecodePayloadCommand0(UINT uiOffset)
 	Temp = _T("");
 	// Spec183.pdf page 82
 	if ((bDeviceStatus & 0x01) != 0)
-		Temp.AddWithDelimiter(_T("Maintenance Required"), _T(" "));
+		Temp.AddWithDelimiter(_T("Maintenance Required"), _T(", "));
 	if ((bDeviceStatus & 0x02) != 0)
-		Temp.AddWithDelimiter(_T("Device Variable Alert"), _T(" "));
+		Temp.AddWithDelimiter(_T("Device Variable Alert"), _T(", "));
 	if ((bDeviceStatus & 0x04) != 0)
-		Temp.AddWithDelimiter(_T("Critical Power Failure"), _T(" "));
+		Temp.AddWithDelimiter(_T("Critical Power Failure"), _T(", "));
 	if ((bDeviceStatus & 0x08) != 0)
-		Temp.AddWithDelimiter(_T("Failure"), _T(" "));
+		Temp.AddWithDelimiter(_T("Failure"), _T(", "));
 	if ((bDeviceStatus & 0x10) != 0)
-		Temp.AddWithDelimiter(_T("Out of Specification"), _T(" "));
+		Temp.AddWithDelimiter(_T("Out of Specification"), _T(", "));
 	if ((bDeviceStatus & 0x20) != 0)
-		Temp.AddWithDelimiter(_T("Function Check"), _T(" "));
+		Temp.AddWithDelimiter(_T("Function Check"), _T(", "));
 	Buffer.AddWithDelimiter(Temp.Get(), _T(" - "));
 	ListViewAdd(_T("Device Status"), Buffer.Get(), 1);
 
@@ -212,6 +291,18 @@ void C_Hayman::DecodePayloadCommand0(UINT uiOffset)
 	ListViewAdd(_T("Minimum Numbers of Preambles"), Buffer.Get(), 1);
 }
 
+// Spec127.pdf page 14
+void C_Hayman::DecodePayloadCommand1(UINT uiOffset)
+{
+	_C_String							Buffer;
+
+	Buffer.Printf(_T("%.1f"), DecodeFloat(&bReceiveBuffer[uiOffset + 1]));
+	ListViewAdd(_T("Primary Variable"), Buffer.Get(), 1);
+
+	Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset]);
+	ListViewAdd(_T("Primary Variable Unit"), Buffer.Get(), 1);
+}
+
 // Spec127.pdf page 15
 void C_Hayman::DecodePayloadCommand2(UINT uiOffset)
 {
@@ -222,6 +313,80 @@ void C_Hayman::DecodePayloadCommand2(UINT uiOffset)
 
 	Buffer.Printf(_T("%.1f %%"), DecodeFloat(&bReceiveBuffer[uiOffset + 4]));
 	ListViewAdd(_T("Percent of Range"), Buffer.Get(), 1);
+}
+
+// Spec127.pdf page 16
+void C_Hayman::DecodePayloadCommand3(UINT uiOffset)
+{
+	_C_String							Buffer;
+
+	if ((uiOffset + (4 + 1 + 4)) <= (uiReceiveBufferLength - 1))
+	{
+		Buffer.Printf(_T("%.1f"), DecodeFloat(&bReceiveBuffer[uiOffset + 0]));
+		ListViewAdd(_T("Primary Variable Loop Current"), Buffer.Get(), 1);
+
+		Buffer.Printf(_T("%.1f"), DecodeFloat(&bReceiveBuffer[uiOffset + 5]));
+		ListViewAdd(_T("Primary Variable"), Buffer.Get(), 1);
+
+		Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset + 4]);
+		ListViewAdd(_T("Primary Variable Unit Code"), Buffer.Get(), 1);
+
+		uiOffset += (4 + 1 + 4);
+	}
+
+	if ((uiOffset + (1 + 4)) <= (uiReceiveBufferLength - 1))
+	{
+		Buffer.Printf(_T("%.1f"), DecodeFloat(&bReceiveBuffer[uiOffset + 5]));
+		ListViewAdd(_T("Secondary Variable"), Buffer.Get(), 1);
+
+		Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset + 4]);
+		ListViewAdd(_T("Secondary Variable Unit Code"), Buffer.Get(), 1);
+
+		uiOffset += (1 + 4);
+	}
+
+	if ((uiOffset + (1 + 4)) <= (uiReceiveBufferLength - 1))
+	{
+		Buffer.Printf(_T("%.1f"), DecodeFloat(&bReceiveBuffer[uiOffset + 5]));
+		ListViewAdd(_T("Tertiary Variable"), Buffer.Get(), 1);
+
+		Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset + 4]);
+		ListViewAdd(_T("Tertiary Variable Unit Code"), Buffer.Get(), 1);
+
+		uiOffset += (1 + 4);
+	}
+
+	if ((uiOffset + (1 + 4)) <= (uiReceiveBufferLength - 1))
+	{
+		Buffer.Printf(_T("%.1f"), DecodeFloat(&bReceiveBuffer[uiOffset + 5]));
+		ListViewAdd(_T("Quaternary Variable"), Buffer.Get(), 1);
+
+		Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset + 4]);
+		ListViewAdd(_T("Quaternary Variable Unit Code"), Buffer.Get(), 1);
+
+		uiOffset += (1 + 4);
+	}
+}
+
+// Spec127.pdf page 29
+void C_Hayman::DecodePayloadCommand13(UINT uiOffset)
+{
+	_C_String							Buffer;
+
+	Buffer = _T("");
+	DecodePackedString(&bReceiveBuffer[uiOffset + 0], &Buffer);
+	DecodePackedString(&bReceiveBuffer[uiOffset + 3], &Buffer);
+	ListViewAdd(_T("Tag"), Buffer.Get(), 1);
+
+	Buffer = _T("");
+	DecodePackedString(&bReceiveBuffer[uiOffset + 6], &Buffer);
+	DecodePackedString(&bReceiveBuffer[uiOffset + 9], &Buffer);
+	DecodePackedString(&bReceiveBuffer[uiOffset + 12], &Buffer);
+	DecodePackedString(&bReceiveBuffer[uiOffset + 15], &Buffer);
+	ListViewAdd(_T("Descriptor"), Buffer.Get(), 1);
+
+	Buffer.Printf(_T("%04u-%02u-%02u"), (bReceiveBuffer[uiOffset + 20] + 1900), bReceiveBuffer[uiOffset + 19], bReceiveBuffer[uiOffset + 18]);
+	ListViewAdd(_T("Date"), Buffer.Get(), 1);
 }
 
 void C_Hayman::UpdateResponse(BOOL bResult)
@@ -242,6 +407,7 @@ void C_Hayman::UpdateResponse(BOOL bResult)
 	// reset everything
 	ListView.DeleteAllItems();
 
+	// received buffer
 	Buffer = _T("");
 	for (uiIndex = 0; uiIndex < uiReceiveBufferLength; uiIndex++)
 	{
@@ -251,11 +417,11 @@ void C_Hayman::UpdateResponse(BOOL bResult)
 		Temp.Printf(_T("0x%02X"), bReceiveBuffer[uiIndex]);
 		Buffer.AddWithDelimiter(Temp.Get(), _T(" "));
 	}
-
 	ListViewAdd(_T("Received"), Buffer.Get(), ((bResult == TRUE) ? 0 : 2));
 
 	if (bResult == TRUE)
 	{
+		// delimiter / address
 		uiOffset = 0;
 		if (bReceiveBuffer[0] == HART_DELIMITER_FIELD_SACK)
 		{
@@ -276,57 +442,74 @@ void C_Hayman::UpdateResponse(BOOL bResult)
 			uiOffset = 6;
 		}
 
+		// command
 		bCommand = bReceiveBuffer[uiOffset];
 		DecodeCommand(bCommand, &Buffer);
 		ListViewAdd(_T("Command"), Buffer.Get(), 0);
 		uiOffset++;
 
+		// payload length
 		Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset]);
 		ListViewAdd(_T("Payload Length"), Buffer.Get(), 0);
 		uiOffset++;
 
+		// checksum
 		Buffer.Printf(_T("0x%02X"), bReceiveBuffer[uiReceiveBufferLength - 1]);
 		ListViewAdd(_T("Checksum"), Buffer.Get(), 0);
 
+		// payload - response code
 		// The first byte is multiplexed and contains either the Communication Status (most significant bit is set) or the Response Code (most significant bit is reset)
 		DecodeResponseCode(bReceiveBuffer[uiOffset], &Buffer);
-		ListViewAdd(_T("Response Code"), Buffer.Get(), 0);
+		ListViewAdd(_T("Response Code"), Buffer.Get(), 3);
 		uiOffset++;
 
+		// payload - field device status
 		// The second byte of a slave response message always contains Field Device Status.
 		// Spec099.pdf page 33
 		bFieldDeviceStatus = bReceiveBuffer[uiOffset];
 		Buffer.Printf(_T("0x%02X"), bFieldDeviceStatus);
 		Temp = _T("");
 		if ((bFieldDeviceStatus & 0x01) != 0)
-			Temp.AddWithDelimiter(_T("Primary Variable Out of Limits"), _T(" "));
+			Temp.AddWithDelimiter(_T("Primary Variable Out of Limits"), _T(", "));
 		if ((bFieldDeviceStatus & 0x02) != 0)
-			Temp.AddWithDelimiter(_T("Non-Primary Variable Out of Limits"), _T(" "));
+			Temp.AddWithDelimiter(_T("Non-Primary Variable Out of Limits"), _T(", "));
 		if ((bFieldDeviceStatus & 0x04) != 0)
-			Temp.AddWithDelimiter(_T("Loop Current Saturated"), _T(" "));
+			Temp.AddWithDelimiter(_T("Loop Current Saturated"), _T(", "));
 		if ((bFieldDeviceStatus & 0x08) != 0)
-			Temp.AddWithDelimiter(_T("Loop Current Fixed"), _T(" "));
+			Temp.AddWithDelimiter(_T("Loop Current Fixed"), _T(", "));
 		if ((bFieldDeviceStatus & 0x10) != 0)
-			Temp.AddWithDelimiter(_T("More Status Available"), _T(" "));
+			Temp.AddWithDelimiter(_T("More Status Available"), _T(", "));
 		if ((bFieldDeviceStatus & 0x20) != 0)
-			Temp.AddWithDelimiter(_T("Cold Start"), _T(" "));
+			Temp.AddWithDelimiter(_T("Cold Start"), _T(", "));
 		if ((bFieldDeviceStatus & 0x40) != 0)
-			Temp.AddWithDelimiter(_T("Configuration Changed"), _T(" "));
+			Temp.AddWithDelimiter(_T("Configuration Changed"), _T(", "));
 		if ((bFieldDeviceStatus & 0x80) != 0)
-			Temp.AddWithDelimiter(_T("Device Malfunction"), _T(" "));
+			Temp.AddWithDelimiter(_T("Device Malfunction"), _T(", "));
 		Buffer.AddWithDelimiter(Temp.Get(), _T(" - "));
-		ListViewAdd(_T("Field Device Status"), Buffer.Get(), 0);
+		ListViewAdd(_T("Field Device Status"), Buffer.Get(), 3);
 		uiOffset++;
+
+		// real payload
+		Buffer = _T("");
+		for (uiIndex = uiOffset; uiIndex < (uiReceiveBufferLength - 1); uiIndex++)
+		{
+			if (((uiIndex % 8) == 0) && (uiIndex != 0))
+				Buffer.Add(_T(" |"));
+
+			Temp.Printf(_T("0x%02X"), bReceiveBuffer[uiIndex]);
+			Buffer.AddWithDelimiter(Temp.Get(), _T(" "));
+		}
+		if (Buffer.GetLength() != 0)
+			ListViewAdd(_T("Payload"), Buffer.Get(), 3);
 
 		switch (bCommand)
 		{
-			case 0:
-				DecodePayloadCommand0(uiOffset);
-				break;
-
-			case 2:
-				DecodePayloadCommand2(uiOffset);
-				break;
+			case 0:		DecodePayloadCommand0(uiOffset);				break;
+			case 1:		DecodePayloadCommand1(uiOffset);				break;
+			case 2:		DecodePayloadCommand2(uiOffset);				break;
+			case 3:		DecodePayloadCommand3(uiOffset);				break;
+			case 13:		DecodePayloadCommand13(uiOffset);			break;
+			default:		DecodePayloadCommandUnknown(uiOffset);		break;
 		}
 	}
 
@@ -512,7 +695,7 @@ BOOL C_Hayman::ListViewCustomDraw(LPNMLVCUSTOMDRAW pNMLVCustomDraw, void *pvCont
 	C_Hayman						*pThis;
 
 	pThis = (C_Hayman *)pvContext;
-//XXX draw graph / color
+
 	switch (pNMLVCustomDraw->nmcd.dwDrawStage)
 	{
 		case CDDS_PREPAINT:
@@ -526,108 +709,15 @@ BOOL C_Hayman::ListViewCustomDraw(LPNMLVCUSTOMDRAW pNMLVCustomDraw, void *pvCont
 			return TRUE;
 
 		case CDDS_ITEMPREPAINT | CDDS_SUBITEM:
-			// Tag: Column
-			if (pNMLVCustomDraw->iSubItem == 8)
-			{
-				//
-				// % colored background
-				//
-				COLOR_HSL_STRUCT			ColorHSL;
-				COLOR_RGB_STRUCT			ColorRGB;
-				int							iDegree;
-				_C_String					Buffer;
-				FLOAT							fFloat;
-
-				pThis->ListView.GetSubItemText(Buffer.Get(), pNMLVCustomDraw->iSubItem, pNMLVCustomDraw->nmcd.dwItemSpec);
-				Buffer.Update();
-				fFloat = 0;
-				_stscanf(Buffer.Get(), _T("%f"), &fFloat);
-
-				// hue: 85-0 -> 120'-0° -> 0%-100%
-				if (fFloat < 0)
-					fFloat = 0;
-				if (fFloat > 100)
-					fFloat = 100;
-
-				iDegree = (int)(fFloat * 120 / 100);
-				ColorHSL.h = 120 - iDegree;
-				ColorHSL.s = 1.0;
-				ColorHSL.l = 0.7;
-				ColorRGB = _C_Color::HSLtoRGB(ColorHSL);
-				pNMLVCustomDraw->clrTextBk = RGB(ColorRGB.r * 255, ColorRGB.g * 255, ColorRGB.b * 255);
-
-				SetWindowLongPtr(pThis->hWnd, DWLP_MSGRESULT, CDRF_DODEFAULT);
-			}
-			// Tag: Column
-			else if (pNMLVCustomDraw->iSubItem == 7)
-			{
-				//
-				// history graph
-				//
-				POINT							*pPoints;
-				UINT							uiEntries;
-				HPEN							hPen;
-				HGDIOBJ						hPrevious;
-				RECT							Rect;
-				LPARAM						lParam;
-				_C_String					Buffer;
-				BOOL							bResult;
-
-				// get sub item rect
-				if (pThis->ListView.GetSubItemRect(pNMLVCustomDraw->nmcd.dwItemSpec, pNMLVCustomDraw->iSubItem, &Rect) == TRUE)
-				{
-					Rect.left++;
-					Rect.top++;
-					Rect.bottom -= 2;
-
-					if (Rect.right > Rect.left)
-					{
-						uiEntries = (Rect.right - Rect.left) - 1;
-						if ((pPoints = (POINT *)malloc(sizeof(POINT) * uiEntries)) != NULL)
-						{
-							if (pThis->ListView.GetItem(pNMLVCustomDraw->nmcd.dwItemSpec, NULL, &lParam) == TRUE)
-							{
-								// check if a float value is shown
-								pThis->ListView.GetSubItemText(Buffer.Get(), 5, pNMLVCustomDraw->nmcd.dwItemSpec);
-								Buffer.Update();
-
-								// get register history
-								if (Buffer.GetLength() > 0)
-									bResult = pThis->DataBase.GetRegisterHistoryFloat(pThis->uiCurrentCycle, Rect.left, Rect.top, (INT)uiEntries, (UINT)(Rect.bottom - Rect.top), LO_WORD(lParam), HI_WORD(lParam), pPoints);
-								else
-									bResult = pThis->DataBase.GetRegisterHistoryInt(pThis->uiCurrentCycle, Rect.left, Rect.top, (INT)uiEntries, (UINT)(Rect.bottom - Rect.top), LO_WORD(lParam), HI_WORD(lParam), pPoints);
-								if (bResult == TRUE)
-								{
-									// draw graph
-									hPen = CreatePen(PS_SOLID, 1, RGB(130, 130, 130));
-									hPrevious = SelectObject(pNMLVCustomDraw->nmcd.hdc, hPen);
-
-									Polyline(pNMLVCustomDraw->nmcd.hdc, pPoints, uiEntries);
-
-									SelectObject(pNMLVCustomDraw->nmcd.hdc, hPrevious);
-									DeleteObject(hPen);
-								}
-							}
-
-							free(pPoints);
-						}
-					}
-				}
-
-				SetWindowLongPtr(pThis->hWnd, DWLP_MSGRESULT, CDRF_SKIPDEFAULT);
-			}
+			//
+			// change the color of every second item
+			//
+			if ((pNMLVCustomDraw->nmcd.dwItemSpec & 1) == 1)
+				pNMLVCustomDraw->clrTextBk = RGB(236, 236, 236);
 			else
-			{
-				//
-				// change the color of every second item
-				//
-				if ((pNMLVCustomDraw->nmcd.dwItemSpec & 1) == 1)
-					pNMLVCustomDraw->clrTextBk = RGB(236, 236, 236);
-				else
-					pNMLVCustomDraw->clrTextBk = RGB(255, 255, 255);	// default white background color
+				pNMLVCustomDraw->clrTextBk = RGB(255, 255, 255);	// default white background color
 
-				SetWindowLongPtr(pThis->hWnd, DWLP_MSGRESULT, CDRF_DODEFAULT);
-			}
+			SetWindowLongPtr(pThis->hWnd, DWLP_MSGRESULT, CDRF_DODEFAULT);
 			return TRUE;
 	}
 
@@ -683,10 +773,7 @@ BOOL C_Hayman::_Handle_Init(void)
 
 	NOVATO_REPORT_SERVER_COMPSOFT
 
-	uiCurrentCycle = 0;
 	bPolling = FALSE;
-
-	DataBase.Init();
 
 	Log.SetFlags(_C_LOG_FLAG_DISABLED);
 
@@ -720,6 +807,12 @@ BOOL C_Hayman::_Handle_Init(void)
 	ComboXCommand.AddItem(Buffer.Get(), 0, IDI_COMMAND, NULL);
 	DecodeCommand(6, &Buffer);
 	ComboXCommand.AddItem(Buffer.Get(), 0, IDI_COMMAND, NULL);
+	DecodeCommand(7, &Buffer);
+	ComboXCommand.AddItem(Buffer.Get(), 0, IDI_COMMAND, NULL);
+	DecodeCommand(8, &Buffer);
+	ComboXCommand.AddItem(Buffer.Get(), 0, IDI_COMMAND, NULL);
+	DecodeCommand(9, &Buffer);
+	ComboXCommand.AddItem(Buffer.Get(), 0, IDI_COMMAND, NULL);
 	DecodeCommand(11, &Buffer);
 	ComboXCommand.AddItem(Buffer.Get(), 0, IDI_COMMAND, NULL);
 	DecodeCommand(12, &Buffer);
@@ -737,6 +830,18 @@ BOOL C_Hayman::_Handle_Init(void)
 	DecodeCommand(18, &Buffer);
 	ComboXCommand.AddItem(Buffer.Get(), 0, IDI_COMMAND, NULL);
 	DecodeCommand(19, &Buffer);
+	ComboXCommand.AddItem(Buffer.Get(), 0, IDI_COMMAND, NULL);
+	DecodeCommand(20, &Buffer);
+	ComboXCommand.AddItem(Buffer.Get(), 0, IDI_COMMAND, NULL);
+	DecodeCommand(21, &Buffer);
+	ComboXCommand.AddItem(Buffer.Get(), 0, IDI_COMMAND, NULL);
+	DecodeCommand(22, &Buffer);
+	ComboXCommand.AddItem(Buffer.Get(), 0, IDI_COMMAND, NULL);
+	DecodeCommand(38, &Buffer);
+	ComboXCommand.AddItem(Buffer.Get(), 0, IDI_COMMAND, NULL);
+	DecodeCommand(48, &Buffer);
+	ComboXCommand.AddItem(Buffer.Get(), 0, IDI_COMMAND, NULL);
+	DecodeCommand(72, &Buffer);
 	ComboXCommand.AddItem(Buffer.Get(), 0, IDI_COMMAND, NULL);
 
 	DecodeCommand(0, &Temp);
@@ -876,8 +981,6 @@ BOOL C_Hayman::_Handle_Exit(INT_PTR iResult)
 
 	ComboXCommand.DeInit();
 	ComboXPayload.DeInit();
-
-	DataBase.DeInit();
 
 	Engine.DeInit();
 

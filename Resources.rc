@@ -29,8 +29,8 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,3,0,1
- PRODUCTVERSION 1,3,0,1
+ FILEVERSION 1,0,1,1
+ PRODUCTVERSION 1,0,1,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x21L
@@ -48,14 +48,14 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "the sz development\0"
             VALUE "FileDescription", "Hayman\0"
-            VALUE "FileVersion", "1.30\0"
+            VALUE "FileVersion", "1.01\0"
             VALUE "InternalName", "Hayman\0"
-            VALUE "LegalCopyright", "Copyright © 2013-2025\0"
+            VALUE "LegalCopyright", "Copyright © 2025\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "Hayman.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "the sz development Hayman\0"
-            VALUE "ProductVersion", "1.30\0"
+            VALUE "ProductVersion", "1.01\0"
             VALUE "SpecialBuild", "The SZ\0"
         END
     END
@@ -106,22 +106,22 @@ STYLE DS_CENTER | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP |
 CAPTION "Dialog"
 FONT 8, "MS Sans Serif"
 BEGIN
+    LTEXT           "Command",IDC_COMMAND_INFO,5,25,35,12,SS_CENTERIMAGE
     COMBOBOX        IDC_COMBO_COMMAND,45,25,200,310,CBS_DROPDOWN | 
+                    CBS_OWNERDRAWVARIABLE | CBS_HASSTRINGS | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "Payload",IDC_PAYLOAD_INFO,255,25,35,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_COMBO_PAYLOAD,295,25,225,310,CBS_DROPDOWN | 
                     CBS_OWNERDRAWVARIABLE | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "List1",IDC_LIST_VIEW,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_NOSORTHEADER | WS_BORDER | 
                     WS_TABSTOP,5,65,515,230
-    LTEXT           "Command",IDC_COMMAND_INFO,5,25,35,12,SS_CENTERIMAGE
-    LTEXT           "Payload",IDC_PAYLOAD_INFO,255,25,35,12,SS_CENTERIMAGE
     CTEXT           "Static",IDC_LINK,320,5,71,14,SS_CENTERIMAGE
     ICON            IDI_EXCLAMATION_MARK,IDC_ERROR_ICON,6,47,20,20,
                     SS_REALSIZEIMAGE
     LTEXT           "Static",IDC_INFO_TEXT,19,45,501,14,SS_CENTERIMAGE
     ICON            IDI_INFO,IDC_INFO_ICON,6,47,20,20,SS_REALSIZEIMAGE
-    COMBOBOX        IDC_COMBO_PAYLOAD,295,25,225,310,CBS_DROPDOWN | 
-                    CBS_OWNERDRAWVARIABLE | CBS_HASSTRINGS | WS_VSCROLL | 
-                    WS_TABSTOP
 END
 
 IDD_OPTIONS DIALOG DISCARDABLE  0, 0, 274, 132

@@ -40,7 +40,6 @@
 #define IDI_EXCLAMATION_MARK            109
 #define IDI_SERIAL_PORT                 110
 #define IDI_SAVE                        117
-#define IDI_SEARCH                      122
 #define IDI_DEVICE                      123
 #define IDI_INFO                        124
 #define IDI_LOG                         129
@@ -74,7 +73,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        139
+#define _APS_NEXT_RESOURCE_VALUE        140
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1036
 #define _APS_NEXT_SYMED_VALUE           101
