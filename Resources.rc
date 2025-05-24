@@ -107,16 +107,15 @@ CAPTION "Dialog"
 FONT 8, "MS Sans Serif"
 BEGIN
     LTEXT           "Command",IDC_COMMAND_INFO,5,25,35,12,SS_CENTERIMAGE
-    COMBOBOX        IDC_COMBO_COMMAND,45,25,200,310,CBS_DROPDOWN | 
+    COMBOBOX        IDC_COMBO_COMMAND,45,25,200,366,CBS_DROPDOWN | 
                     CBS_OWNERDRAWVARIABLE | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Payload",IDC_PAYLOAD_INFO,255,25,35,12,SS_CENTERIMAGE
-    COMBOBOX        IDC_COMBO_PAYLOAD,295,25,225,310,CBS_DROPDOWN | 
+    COMBOBOX        IDC_COMBO_PAYLOAD,295,25,225,366,CBS_DROPDOWN | 
                     CBS_OWNERDRAWVARIABLE | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "List1",IDC_LIST_VIEW,"SysListView32",LVS_REPORT | 
-                    LVS_SINGLESEL | LVS_NOSORTHEADER | WS_BORDER | 
-                    WS_TABSTOP,5,65,515,230
+                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,5,65,515,230
     CTEXT           "Static",IDC_LINK,320,5,71,14,SS_CENTERIMAGE
     ICON            IDI_EXCLAMATION_MARK,IDC_ERROR_ICON,6,47,20,20,
                     SS_REALSIZEIMAGE
@@ -212,6 +211,67 @@ IDR_RT_MANIFEST         24      DISCARDABLE     "Application.manifest.xml"
 //
 
 IDC_MY_HAND             CURSOR  DISCARDABLE     "_Resources\\Hand_Own.cur"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_COMMAND             "Kommando"
+    IDS_PAYLOAD             "Daten"
+    IDS_COMMAND_FAILED      "Kommando fehlgeschlagen"
+    IDS_FILTER_SAVE         "CSV Format|*.csv|XML Format|*.xml||"
+    IDS_SELECT_CURRENT_VALUES   "Bitte wählen Sie eine Datei für die aktuellen Werte aus"
+    IDS_ERROR_OPEN          "Verbindung kann nicht geöffnet werden..."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_ALIAS               "Alias"
+    IDS_OPTIONS             "Optionen"
+    IDS_SAVE                "Werte Speichern"
+    IDS_POLLING             "Pollen"
+    IDS_STOP                "Anhalten"
+    IDS_SELECT              "Auswählen"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_DEVICE_LIST         "Serieller Anschluss"
+    IDS_REFRESH_RATE        "Aktualisierungsrate"
+    IDS_REFRESH_RATE_MS     "ms"
+    IDS_CHECK_AUTO_START    "Bei Programmstart mit Abfragen beginnen"
+    IDS_CHECK_AUTO_UPDATE   "Automatisch nach Updates suchen"
+    IDS_OK                  "OK"
+    IDS_CANCEL              "Abbrechen"
+    IDS_USE_LAST_DEVICE     "Letzten Port der Liste benutzen"
+    IDS_STATISTIC           "Erfolgreich %1!u! - Fehler %2!u!"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_LOG                 "Werte in Logdatei schreiben"
+    IDS_FILTER_LOG          "CVS Format|*.csv||"
+    IDS_SELECT_LOG_FILE     "Bitte wählen Sie eine Logdatei aus"
+    IDS_NAME                "Name"
+    IDS_VALUE               "Wert"
+    IDS_SEND_COMMAND        "Kommando senden"
+    IDS_ERROR_CANT_OPEN_PORT   "Serielle Schnittstelle kann nicht geöffnet werden"
+    IDS_ERROR_MESSAGE_START_NOT_FOUND   "Nachrichtenanfang nicht gefunden"
+    IDS_ERROR_MESSAGE_END_NOT_FOUND   "Nachrichtenende nicht gefunden"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_ERROR_CANT_SEND     "Daten können nicht gesendet werden"
+    IDS_ERROR_CANT_READ     "Daten können nicht gelesen werden"
+    IDS_ERROR_CHECKSUM_FAILED   "Prüfsumme falsch"
+    IDS_ERROR_LONG_ADDRESS_NOT_KNOWN   "Long address unbekannt"
+    IDS_ERROR_PACKET_TOO_LONG   "Paket zu lang"
+END
+
 #endif    // German (Germany) resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -271,6 +331,18 @@ BEGIN
     IDS_NAME                "Name"
     IDS_VALUE               "Value"
     IDS_SEND_COMMAND        "Send Command"
+    IDS_ERROR_CANT_OPEN_PORT "Can't open port."
+    IDS_ERROR_MESSAGE_START_NOT_FOUND "Message start not found"
+    IDS_ERROR_MESSAGE_END_NOT_FOUND "Message end not found"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_ERROR_CANT_SEND     "Can't send data"
+    IDS_ERROR_CANT_READ     "Can't read data"
+    IDS_ERROR_CHECKSUM_FAILED "Checksum wrong"
+    IDS_ERROR_LONG_ADDRESS_NOT_KNOWN "Long address not known"
+    IDS_ERROR_PACKET_TOO_LONG "Packet too long"
 END
 
 #endif    // English (U.K.) resources

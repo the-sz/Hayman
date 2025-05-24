@@ -131,38 +131,54 @@ void C_Hayman::DecodeManufacturerAndDevice(WORD wManufacturer, WORD wDeviceType,
 
 void C_Hayman::DecodeCommand(WORD wCommand, _C_String *pCommand)
 {
-	TCHAR				*pszCommand;
+	TCHAR							*pszCommand;
+	C_CommandName				*pCommandName;
 
 	pszCommand = NULL;
 
-	switch (wCommand)
+	pCommandName = (C_CommandName *)CommandNameList.GetFirstListable();
+	while (pCommandName != NULL)
 	{
-		// Spec127.pdf
-		case 0:		pszCommand = _T("Read Unique Identifier");									break;
-		case 1:		pszCommand = _T("Read Primary Variable");										break;
-		case 2:		pszCommand = _T("Read Loop Current And Percent Of Range");				break;
-		case 3:		pszCommand = _T("Read Dynamic Variables And Loop Current");				break;
-		case 6:		pszCommand = _T("Write Polling Address");										break;
-		case 7:		pszCommand = _T("Read Loop Configuration");									break;
-		case 8:		pszCommand = _T("Read Dynamic Variable Classifications");				break;
-		case 9:		pszCommand = _T("Read Device Variables with Status");						break;
-		case 11:		pszCommand = _T("Read Unique Identifier Associated With Tag");			break;
-		case 12:		pszCommand = _T("Read Message");													break;
-		case 13:		pszCommand = _T("Read Tag, Descriptor, Date");								break;
-		case 14:		pszCommand = _T("Read Primary Variable Sensor Information");			break;
-		case 15:		pszCommand = _T("Read Device Information");									break;
-		case 16:		pszCommand = _T("Read Final Assembly Number");								break;
-		case 17:		pszCommand = _T("Write Message");												break;
-		case 18:		pszCommand = _T("Write Tag, Descriptor, Date");								break;
-		case 19:		pszCommand = _T("Write Final Assembly Number");								break;
-		case 20:		pszCommand = _T("Read Long Tag");												break;
-		case 21:		pszCommand = _T("Read Unique Identifier Associated With Long Tag");	break;
-		case 22:		pszCommand = _T("Write Long Tag");												break;
-		case 38:		pszCommand = _T("Reset Configuration Changed Flag");						break;
-		case 48:		pszCommand = _T("Read Additional Device Status");							break;
+		if (pCommandName->wCommand == wCommand)
+		{
+			pszCommand = pCommandName->Name.Get();
+			break;
+		}
 
-		// Spec151.pdf
-		case 72:		pszCommand = _T("Squawk");															break;
+		pCommandName = (C_CommandName *)pCommandName->GetNextListable();
+	}
+
+	if (pszCommand == NULL)
+	{
+		switch (wCommand)
+		{
+			// Spec127.pdf
+			case 0:		pszCommand = _T("Read Unique Identifier");									break;
+			case 1:		pszCommand = _T("Read Primary Variable");										break;
+			case 2:		pszCommand = _T("Read Loop Current And Percent Of Range");				break;
+			case 3:		pszCommand = _T("Read Dynamic Variables And Loop Current");				break;
+			case 6:		pszCommand = _T("Write Polling Address");										break;
+			case 7:		pszCommand = _T("Read Loop Configuration");									break;
+			case 8:		pszCommand = _T("Read Dynamic Variable Classifications");				break;
+			case 9:		pszCommand = _T("Read Device Variables with Status");						break;
+			case 11:		pszCommand = _T("Read Unique Identifier Associated With Tag");			break;
+			case 12:		pszCommand = _T("Read Message");													break;
+			case 13:		pszCommand = _T("Read Tag, Descriptor, Date");								break;
+			case 14:		pszCommand = _T("Read Primary Variable Sensor Information");			break;
+			case 15:		pszCommand = _T("Read Device Information");									break;
+			case 16:		pszCommand = _T("Read Final Assembly Number");								break;
+			case 17:		pszCommand = _T("Write Message");												break;
+			case 18:		pszCommand = _T("Write Tag, Descriptor, Date");								break;
+			case 19:		pszCommand = _T("Write Final Assembly Number");								break;
+			case 20:		pszCommand = _T("Read Long Tag");												break;
+			case 21:		pszCommand = _T("Read Unique Identifier Associated With Long Tag");	break;
+			case 22:		pszCommand = _T("Write Long Tag");												break;
+			case 38:		pszCommand = _T("Reset Configuration Changed Flag");						break;
+			case 48:		pszCommand = _T("Read Additional Device Status");							break;
+
+			// Spec151.pdf
+			case 72:		pszCommand = _T("Squawk");															break;
+		}
 	}
 
 	if (pszCommand != NULL)
@@ -389,7 +405,7 @@ void C_Hayman::DecodePayloadCommand13(UINT uiOffset)
 	ListViewAdd(_T("Date"), Buffer.Get(), 1);
 }
 
-void C_Hayman::UpdateResponse(BOOL bResult)
+void C_Hayman::UpdateResponse(HART_RESULT_ENUM Result)
 {
 	_C_String							Buffer;
 	_C_String							Temp;
@@ -417,9 +433,10 @@ void C_Hayman::UpdateResponse(BOOL bResult)
 		Temp.Printf(_T("0x%02X"), bReceiveBuffer[uiIndex]);
 		Buffer.AddWithDelimiter(Temp.Get(), _T(" "));
 	}
-	ListViewAdd(_T("Received"), Buffer.Get(), ((bResult == TRUE) ? 0 : 2));
+	if (Buffer.GetLength() != 0)
+		ListViewAdd(_T("Received"), Buffer.Get(), ((Result == HR_SUCCESS) ? 0 : 2));
 
-	if (bResult == TRUE)
+	if (Result == HR_SUCCESS)
 	{
 		// delimiter / address
 		uiOffset = 0;
@@ -518,11 +535,20 @@ void C_Hayman::UpdateResponse(BOOL bResult)
 	// enable ui
 	ListView.Update(TRUE);
 
-//xxx better erorr code?
-	if (bResult == FALSE)
-		ShowError(IDS_COMMAND_FAILED);
-	else
-		ShowStatistic();
+	switch (Result)
+	{
+		default:
+		case HR_ERROR:										ShowError(IDS_COMMAND_FAILED);						break;
+		case HR_ERROR_CANT_OPEN_PORT:					ShowError(IDS_ERROR_CANT_OPEN_PORT);				break;
+		case HR_ERROR_MESSAGE_START_NOT_FOUND:		ShowError(IDS_ERROR_MESSAGE_START_NOT_FOUND);	break;
+		case HR_ERROR_MESSAGE_END_NOT_FOUND:		ShowError(IDS_ERROR_MESSAGE_END_NOT_FOUND);		break;
+		case HR_ERROR_CANT_SEND:						ShowError(IDS_ERROR_CANT_SEND);						break;
+		case HR_ERROR_CANT_READ:						ShowError(IDS_ERROR_CANT_READ);						break;
+		case HR_ERROR_CHECKSUM_FAILED:				ShowError(IDS_ERROR_CHECKSUM_FAILED);				break;
+		case HR_ERROR_LONG_ADDRESS_NOT_KNOWN:		ShowError(IDS_ERROR_LONG_ADDRESS_NOT_KNOWN);		break;
+		case HR_ERROR_PACKET_TOO_LONG:				ShowError(IDS_ERROR_PACKET_TOO_LONG);				break;
+		case HR_SUCCESS:									ShowStatistic();											break;
+	}
 
 	if (bPolling == TRUE)
 		SetTimer(hWnd, TIMER_ID_REFRESH, uiRefresh, NULL);	// re-arm update timer
@@ -724,6 +750,26 @@ BOOL C_Hayman::ListViewCustomDraw(LPNMLVCUSTOMDRAW pNMLVCustomDraw, void *pvCont
 	return FALSE;
 }
 
+void C_Hayman::ListViewKeyDown(INT iItem, LPARAM lParam, WORD wKey, void *pvContext)
+{
+	C_Hayman						*pThis;
+
+	UNREF_PARAM(iItem)
+	UNREF_PARAM(lParam)
+
+	pThis = (C_Hayman *)pvContext;
+
+	if (wKey == 'C')
+	{
+		if ((GetKeyState(VK_CONTROL) & 0x80000000) != 0)
+			pThis->ListViewCopy();
+	}
+	else if (wKey == VK_F5)
+	{
+		pThis->SendCommand();
+	}
+}
+
 BOOL C_Hayman::MRUPayloadCallback(TCHAR *pszString, DWORD dwTime, UINT uiIndex, void *pvContext)
 {
 	C_Hayman								*pThis;
@@ -760,43 +806,69 @@ void C_Hayman::Polling(void)
 	}
 }
 
-BOOL C_Hayman::_Handle_Init(void)
+void C_Hayman::ListViewCopy(void)
 {
+	_C_String			Text;
+	_C_String			Buffer;
+	INT					iSubItem;
+	INT					iItem;
+
+	// add selected items
+	iItem = -1;
+	while (ListView.GetSelectedItem(&iItem, NULL, NULL, MAX_PATH, iItem) == TRUE)
+	{
+		for (iSubItem = 0; iSubItem < ListView.GetColumnCount(); iSubItem++)
+		{
+			Text = _T("");
+			ListView.GetSubItemText(Text.Get(), iSubItem, iItem);
+			Text.Update();
+
+			if (iSubItem != 0)
+				Buffer.Add(_T("\t"));
+			Buffer.Add(&Text);
+		}
+
+		Buffer.Add(_T(_C_STRING_NEW_LINE));
+	}
+
+	_C_Clipboard::Paste(Buffer.Get());
+}
+
+BOOL C_Hayman::CommandNameXMLEnum(_C_XML_ENUM_CALLBACK_TYPE_ENUM Type, void *pvElement, _C_String *pName, _C_String *pText, void *pvContext, _C_XML *pXML)
+{
+	C_Hayman								*pThis;
+	C_CommandName						*pCommandName;
 	_C_String							Buffer;
-	_C_String							Temp;
-	INT_PTR								iIndex;
-	_C_CommandLine						CommandLine;
-	_C_Language							Language;
 
-	_SetAppIcon(IDI_APP);
-	_SetAppWindowText(Resources.GetVersionTitlebar(APP_NAME, hInstance, NULL));
+	UNREF_PARAM(pName)
+	UNREF_PARAM(pText)
 
-	NOVATO_REPORT_SERVER_COMPSOFT
+	pThis = (C_Hayman *)pvContext;
 
-	bPolling = FALSE;
+	if (Type == ECT_NODE)
+	{
+		if ((pCommandName = new C_CommandName()) != NULL)
+		{
+			// add command to our list
+			pCommandName->wCommand = (WORD)pXML->GetValue(_T("Command"), 0, pvElement);
+			pCommandName->Name = pText->Get();
+			pThis->CommandNameList.AddBottom(pCommandName);
 
-	Log.SetFlags(_C_LOG_FLAG_DISABLED);
+			// add command to combobox
+			pThis->DecodeCommand(pCommandName->wCommand, &Buffer);
+			pThis->ComboXCommand.AddItem(Buffer.Get(), 0, IDI_COMMAND, NULL);
+		}
+	}
 
-	CommandLine.AddString(_T("l"));
-	CommandLine.Process();
-	if (CommandLine.GetString(_T("l")) != NULL)
-		StringTable.SetLanguage(Language.GetLanguageFromString(CommandLine.GetString(_T("l"))));
+	return FALSE;
+}
 
-	ImageList.Init(C_IMAGELIST_FLAG_USE_SMALL_ICONS, hWnd);
-	SendMessage(_GetItemHwnd(IDC_ERROR_ICON), STM_SETIMAGE, IMAGE_ICON, (LPARAM)ImageList.GetIcon(ImageList.AddIcon(hInstance, IDI_EXCLAMATION_MARK)));
-	SendMessage(_GetItemHwnd(IDC_INFO_ICON), STM_SETIMAGE, IMAGE_ICON, (LPARAM)ImageList.GetIcon(ImageList.AddIcon(hInstance, IDI_INFO)));
+void C_Hayman::CommandNameInit(void)
+{
+	_C_XML							XML;
+	_C_String						Buffer;
 
-	_SetItemText(IDC_INFO_TEXT, _T(""));
-	_ShowItem(IDC_ERROR_ICON, FALSE);
-	_ShowItem(IDC_INFO_ICON, FALSE);
-
-	Settings.Init(_C_SETTINGS_USE_REGISTRY, REGISTRY_KEY, REGISTRY_SUB_KEY);
-	uiFlags = (UINT)Settings.GetDWORD(_T("Flags"), FLAG_AUTO_START | FLAG_AUTO_UPDATE);
-
-	uiRefresh = (UINT)Settings.GetDWORD(_T("Refresh"), 1000);
-	Settings.GetString(_T("SerialPort"), &SerialPort, SERIAL_PORT_USE_LAST_DEVICE);
-
-	ComboXCommand.Init(_GetItemHwnd(IDC_COMBO_COMMAND), hInstance, TRUE);
+	// add default commands
 	DecodeCommand(0, &Buffer);
 	ComboXCommand.AddItem(Buffer.Get(), 0, IDI_COMMAND, NULL);
 	DecodeCommand(1, &Buffer);
@@ -844,6 +916,60 @@ BOOL C_Hayman::_Handle_Init(void)
 	DecodeCommand(72, &Buffer);
 	ComboXCommand.AddItem(Buffer.Get(), 0, IDI_COMMAND, NULL);
 
+	// load commands from xml
+	Hayman.Resources.GetExePath(Hayman.hInstance, Buffer.Get());
+	Buffer.Update();
+	Buffer.Add(_T("Hayman.xml"));
+
+	if (XML.Init() == TRUE)
+	{
+		if (XML.LoadFromFile(&Buffer) == TRUE)
+			XML.Enum(_T("Hayman\\Commands"), CommandNameXMLEnum, this);
+
+		XML.DeInit();
+	}
+}
+
+BOOL C_Hayman::_Handle_Init(void)
+{
+	_C_String							Buffer;
+	_C_String							Temp;
+	INT_PTR								iIndex;
+	_C_CommandLine						CommandLine;
+	_C_Language							Language;
+
+	_SetAppIcon(IDI_APP);
+	_SetAppWindowText(Resources.GetVersionTitlebar(APP_NAME, hInstance, NULL));
+
+	NOVATO_REPORT_SERVER_COMPSOFT
+
+	bPolling = FALSE;
+
+	Log.SetFlags(_C_LOG_FLAG_DISABLED);
+
+	CommandLine.AddString(_T("l"));
+	CommandLine.Process();
+	if (CommandLine.GetString(_T("l")) != NULL)
+		StringTable.SetLanguage(Language.GetLanguageFromString(CommandLine.GetString(_T("l"))));
+
+	ImageList.Init(C_IMAGELIST_FLAG_USE_SMALL_ICONS, hWnd);
+	SendMessage(_GetItemHwnd(IDC_ERROR_ICON), STM_SETIMAGE, IMAGE_ICON, (LPARAM)ImageList.GetIcon(ImageList.AddIcon(hInstance, IDI_EXCLAMATION_MARK)));
+	SendMessage(_GetItemHwnd(IDC_INFO_ICON), STM_SETIMAGE, IMAGE_ICON, (LPARAM)ImageList.GetIcon(ImageList.AddIcon(hInstance, IDI_INFO)));
+
+	_SetItemText(IDC_INFO_TEXT, _T(""));
+	_ShowItem(IDC_ERROR_ICON, FALSE);
+	_ShowItem(IDC_INFO_ICON, FALSE);
+
+	Settings.Init(_C_SETTINGS_USE_REGISTRY, REGISTRY_KEY, REGISTRY_SUB_KEY);
+	uiFlags = (UINT)Settings.GetDWORD(_T("Flags"), FLAG_AUTO_START | FLAG_AUTO_UPDATE);
+
+	uiRefresh = (UINT)Settings.GetDWORD(_T("Refresh"), 1000);
+	Settings.GetString(_T("SerialPort"), &SerialPort, SERIAL_PORT_USE_LAST_DEVICE);
+
+	ComboXCommand.Init(_GetItemHwnd(IDC_COMBO_COMMAND), hInstance, TRUE);
+
+	CommandNameInit();
+
 	DecodeCommand(0, &Temp);
 	Settings.GetString(_T("Command"), &Buffer, Temp.Get());
 	if (ComboXCommand.FindItem(Buffer.Get(), FALSE, -1, &iIndex) == TRUE)
@@ -859,7 +985,7 @@ BOOL C_Hayman::_Handle_Init(void)
 
 	ListView.Init(_GetItemHwnd(IDC_LIST_VIEW), hInstance, _C_LIST_VIEW_FLAG_ALLOW_COLUMN_SELECTION | _C_LIST_VIEW_FLAG_EDIT_ALL);
 	ListView.SetNotificationFunctions(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, this);
-	ListView.SetNotificationFunctionsEx(NULL, NULL, NULL, NULL, NULL, ListViewCustomDraw);
+	ListView.SetNotificationFunctionsEx(NULL, ListViewKeyDown, NULL, NULL, NULL, ListViewCustomDraw);
 	ListView.SetExStyles(LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER | LVS_EX_LABELTIP | LVS_EX_HEADERDRAGDROP, LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER | LVS_EX_LABELTIP | LVS_EX_HEADERDRAGDROP);
 	ListView.AddIcon(IDI_DOT_BLUE);
 	ListView.AddIcon(IDI_DOT_GREEN);
@@ -984,6 +1110,8 @@ BOOL C_Hayman::_Handle_Exit(INT_PTR iResult)
 
 	Engine.DeInit();
 
+	CommandNameList.DeleteAllListable();
+
 	return TRUE;
 }
 
@@ -1028,7 +1156,7 @@ BOOL C_Hayman::_Handle_MESSAGE(UINT uiMsg, WPARAM wParam, LPARAM lParam)
 			return TRUE;
 
 		case USR_UPDATE_RESPONSE:
-			UpdateResponse(wParam);
+			UpdateResponse((HART_RESULT_ENUM)wParam);
 			return TRUE;
 
 		case WM_NCHITTEST:
@@ -1052,6 +1180,14 @@ BOOL C_Hayman::_Handle_MESSAGE(UINT uiMsg, WPARAM wParam, LPARAM lParam)
 			if (ComboXPayload.Handle_WM_MEASUREITEM(wParam, lParam) == TRUE)
 					return TRUE;
 			return ComboXCommand.Handle_WM_MEASUREITEM(wParam, lParam);
+
+		case WM_DPICHANGED:
+			ComboXPayload.Handle_WM_DPICHANGED();
+			ComboXCommand.Handle_WM_DPICHANGED();
+			ToolBar.Handle_WM_DPICHANGED();
+			Rebar.Handle_WM_DPICHANGED();
+			Grip.Handle_WM_DPICHANGED();
+			break;
 
 		case WM_NOTIFY:
 			if (ListView.ProcessNotifyMessage(hWnd, wParam, lParam, &bResult) == TRUE)

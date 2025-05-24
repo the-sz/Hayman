@@ -30,6 +30,14 @@
 #define IDS_NAME                        58
 #define IDS_VALUE                       59
 #define IDS_SEND_COMMAND                60
+#define IDS_ERROR_CANT_OPEN_PORT        61
+#define IDS_ERROR_MESSAGE_START_NOT_FOUND 62
+#define IDS_ERROR_MESSAGE_END_NOT_FOUND 63
+#define IDS_ERROR_CANT_SEND             64
+#define IDS_ERROR_CANT_READ             65
+#define IDS_ERROR_CHECKSUM_FAILED       66
+#define IDS_ERROR_LONG_ADDRESS_NOT_KNOWN 67
+#define IDS_ERROR_PACKET_TOO_LONG       68
 #define IDI_APP                         101
 #define IDD_MAIN                        102
 #define IDD_OPTIONS                     104

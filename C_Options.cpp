@@ -122,6 +122,10 @@ BOOL C_Options::_Handle_MESSAGE(UINT uiMsg, WPARAM wParam, LPARAM lParam)
 
 		case WM_MEASUREITEM:
 			return ComboXDeviceList.Handle_WM_MEASUREITEM(wParam, lParam);
+
+		case WM_DPICHANGED:
+			ComboXDeviceList.Handle_WM_DPICHANGED();
+			break;
 	}
 
 	return _C_AppDialog::_Handle_MESSAGE(uiMsg, wParam, lParam);

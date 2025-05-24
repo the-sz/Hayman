@@ -199,6 +199,10 @@ SOURCE=..\_Include\_C_Buffer.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\_Include\_C_Clipboard.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\_Include\_C_CoInitializeEx.h
 # End Source File
 # Begin Source File

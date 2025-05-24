@@ -1,0 +1,6 @@
+<Hayman>
+   <Commands>
+      <Command Command="123">foo bar1</Command>
+      <Command Command="123">foo bar2</Command>
+   </Commands>
+</Hayman>

@@ -20,6 +20,7 @@
 #include <_C_CommandLine.h>
 #include <_C_Language.h>
 #include <_C_ProgressBar.h>
+#include <_C_Clipboard.h>
 #include <_C_MRU.h>
 #include <_C_Debug.h>
 
@@ -52,9 +53,16 @@
 
 #define TIMER_ID_REFRESH									0x01
 
-#define USR_UPDATE_RESPONSE								(WM_APP + 1)		//	wParam: bResult
+#define USR_UPDATE_RESPONSE								(WM_APP + 1)		//	wParam: HART_RESULT_ENUM
 
 #define SERIAL_PORT_USE_LAST_DEVICE						_T("***USE_LAST_DEVICE***")
+
+class C_CommandName : public _C_Listable
+{
+	public:
+		WORD														wCommand;
+		_C_String												Name;
+};
 
 class C_Hayman : public _C_AppDialog
 {
@@ -75,9 +83,13 @@ class C_Hayman : public _C_AppDialog
 		_C_Log													Log;
 		BYTE														bReceiveBuffer[100];
 		UINT														uiReceiveBufferLength;
+		_C_List													CommandNameList;
 
 		static BOOL ListViewCustomDraw(LPNMLVCUSTOMDRAW pNMLVCustomDraw, void *pvContext);
+		static void ListViewKeyDown(INT iItem, LPARAM lParam, WORD wKey, void *pvContext);
 		static BOOL MRUPayloadCallback(TCHAR *pszString, DWORD dwTime, UINT uiIndex, void *pvContext);
+		static BOOL CommandNameXMLEnum(_C_XML_ENUM_CALLBACK_TYPE_ENUM Type, void *pvElement, _C_String *pName, _C_String *pText, void *pvContext, _C_XML *pXML);
+		void CommandNameInit(void);
 		void Save(void);
 		void LogControl(void);
 		void ShowStatistic(void);
@@ -95,6 +107,7 @@ class C_Hayman : public _C_AppDialog
 		void DecodePayloadCommand3(UINT uiOffset);
 		void DecodePayloadCommand13(UINT uiOffset);
 		void Polling(void);
+		void ListViewCopy(void);
 
 	public:
 		_C_Resources											Resources;
@@ -106,7 +119,7 @@ class C_Hayman : public _C_AppDialog
 		BOOL														bPolling;
 
 		void SendCommand(void);
-		void UpdateResponse(BOOL bResult);
+		void UpdateResponse(HART_RESULT_ENUM Result);
 
 		BOOL _Handle_Init(void);
 		BOOL _Handle_Exit(INT_PTR iResult);		// if this function returns FALSE, _EndDialog will not be executed
