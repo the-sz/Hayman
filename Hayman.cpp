@@ -784,6 +784,14 @@ BOOL C_Hayman::MRUPayloadCallback(TCHAR *pszString, DWORD dwTime, UINT uiIndex, 
 	return TRUE;
 }
 
+void C_Hayman::SetPollingButton(void)
+{
+	if (bPolling == TRUE)
+		ToolBar.SetButton(IDC_TOOL_POLLING, TBIF_IMAGE | TBIF_TEXT, 2, 0, 0, 0, StringTable.GetStringEx(IDS_STOP));
+	else
+		ToolBar.SetButton(IDC_TOOL_POLLING, TBIF_IMAGE | TBIF_TEXT, 1, 0, 0, 0, StringTable.GetStringEx(IDS_POLLING));
+}
+
 void C_Hayman::Polling(void)
 {
 	if (bPolling == TRUE)
@@ -792,14 +800,14 @@ void C_Hayman::Polling(void)
 
 		bPolling = FALSE;
 
-		ToolBar.SetButton(IDC_TOOL_POLLING, TBIF_IMAGE | TBIF_TEXT, 1, 0, 0, 0, StringTable.GetStringEx(IDS_POLLING));
+		SetPollingButton();
 		ToolBar.SetButton(IDC_TOOL_SAVE, TBIF_STATE, 0, 0, 0, TBSTATE_ENABLED, _T(""));
 	}
 	else
 	{
 		bPolling = TRUE;
 
-		ToolBar.SetButton(IDC_TOOL_POLLING, TBIF_IMAGE | TBIF_TEXT, 2, 0, 0, 0, StringTable.GetStringEx(IDS_STOP));
+		SetPollingButton();
 		ToolBar.SetButton(IDC_TOOL_SAVE, TBIF_STATE, 0, 0, 0, TBSTATE_INDETERMINATE, _T(""));
 
 		SendCommand();
@@ -1050,7 +1058,7 @@ BOOL C_Hayman::_Handle_Init(void)
 	_SetItemText(IDC_COMMAND_INFO, Hayman.StringTable.GetStringEx(IDS_COMMAND));
 	_SetItemText(IDC_PAYLOAD_INFO, Hayman.StringTable.GetStringEx(IDS_PAYLOAD));
 
-	_SetMinSize(400, 250, TRUE);
+	_SetMinSize(400, 150, TRUE);
 
 	AlignContainer.Add(_GetItemHwnd(IDC_LIST_VIEW), ALIGN_WIDTH_FILL | ALIGN_HEIGHT_FILL);
 	AlignContainer.Add(_GetItemHwnd(IDC_COMBO_PAYLOAD), ALIGN_WIDTH_FILL);
@@ -1185,8 +1193,15 @@ BOOL C_Hayman::_Handle_MESSAGE(UINT uiMsg, WPARAM wParam, LPARAM lParam)
 			ComboXPayload.Handle_WM_DPICHANGED();
 			ComboXCommand.Handle_WM_DPICHANGED();
 			ToolBar.Handle_WM_DPICHANGED();
+			ToolBar.SetButton(IDC_TOOL_SEND_COMMAND, TBIF_TEXT, 0, 0, 0, 0, StringTable.GetStringEx(IDS_SEND_COMMAND));
+			SetPollingButton();
 			Rebar.Handle_WM_DPICHANGED();
 			Grip.Handle_WM_DPICHANGED();
+			if (ImageList.Resize(hWnd) == TRUE)
+			{
+				SendMessage(_GetItemHwnd(IDC_ERROR_ICON), STM_SETIMAGE, IMAGE_ICON, (LPARAM)ImageList.GetIcon(0));
+				SendMessage(_GetItemHwnd(IDC_INFO_ICON), STM_SETIMAGE, IMAGE_ICON, (LPARAM)ImageList.GetIcon(1));
+			}
 			break;
 
 		case WM_NOTIFY:

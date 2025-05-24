@@ -117,10 +117,10 @@ BEGIN
     CONTROL         "List1",IDC_LIST_VIEW,"SysListView32",LVS_REPORT | 
                     LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,5,65,515,230
     CTEXT           "Static",IDC_LINK,320,5,71,14,SS_CENTERIMAGE
-    ICON            IDI_EXCLAMATION_MARK,IDC_ERROR_ICON,6,47,20,20,
+    ICON            IDI_EXCLAMATION_MARK,IDC_ERROR_ICON,6,48,20,20,
                     SS_REALSIZEIMAGE
     LTEXT           "Static",IDC_INFO_TEXT,19,45,501,14,SS_CENTERIMAGE
-    ICON            IDI_INFO,IDC_INFO_ICON,6,47,20,20,SS_REALSIZEIMAGE
+    ICON            IDI_INFO,IDC_INFO_ICON,6,48,20,20,SS_REALSIZEIMAGE
 END
 
 IDD_OPTIONS DIALOG DISCARDABLE  0, 0, 274, 132
@@ -223,7 +223,8 @@ BEGIN
     IDS_PAYLOAD             "Daten"
     IDS_COMMAND_FAILED      "Kommando fehlgeschlagen"
     IDS_FILTER_SAVE         "CSV Format|*.csv|XML Format|*.xml||"
-    IDS_SELECT_CURRENT_VALUES   "Bitte wählen Sie eine Datei für die aktuellen Werte aus"
+    IDS_SELECT_CURRENT_VALUES 
+                            "Bitte wählen Sie eine Datei für die aktuellen Werte aus"
     IDS_ERROR_OPEN          "Verbindung kann nicht geöffnet werden..."
 END
 
@@ -258,18 +259,19 @@ BEGIN
     IDS_NAME                "Name"
     IDS_VALUE               "Wert"
     IDS_SEND_COMMAND        "Kommando senden"
-    IDS_ERROR_CANT_OPEN_PORT   "Serielle Schnittstelle kann nicht geöffnet werden"
-    IDS_ERROR_MESSAGE_START_NOT_FOUND   "Nachrichtenanfang nicht gefunden"
-    IDS_ERROR_MESSAGE_END_NOT_FOUND   "Nachrichtenende nicht gefunden"
+    IDS_ERROR_CANT_OPEN_PORT 
+                            "Serielle Schnittstelle kann nicht geöffnet werden"
+    IDS_ERROR_MESSAGE_START_NOT_FOUND "Nachrichtenanfang nicht gefunden"
+    IDS_ERROR_MESSAGE_END_NOT_FOUND "Nachrichtenende nicht gefunden"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_ERROR_CANT_SEND     "Daten können nicht gesendet werden"
     IDS_ERROR_CANT_READ     "Daten können nicht gelesen werden"
-    IDS_ERROR_CHECKSUM_FAILED   "Prüfsumme falsch"
-    IDS_ERROR_LONG_ADDRESS_NOT_KNOWN   "Long address unbekannt"
-    IDS_ERROR_PACKET_TOO_LONG   "Paket zu lang"
+    IDS_ERROR_CHECKSUM_FAILED "Prüfsumme falsch"
+    IDS_ERROR_LONG_ADDRESS_NOT_KNOWN "Long address unbekannt"
+    IDS_ERROR_PACKET_TOO_LONG "Paket zu lang"
 END
 
 #endif    // German (Germany) resources
