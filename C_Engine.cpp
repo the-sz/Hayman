@@ -26,7 +26,7 @@ void C_Engine::Close(void)
 	HART.Close();
 }
 
-void C_Engine::SendCommand(WORD wCommand, void *pvAdditionalBuffer, BYTE bAdditionalBufferLength, void *pvReceiveBuffer, UINT *puiReceiveBufferLength, HWND hWnd, UINT uiMsg)
+void C_Engine::SendCommand(BYTE bShortAddress, WORD wCommand, void *pvAdditionalBuffer, BYTE bAdditionalBufferLength, void *pvReceiveBuffer, UINT *puiReceiveBufferLength, HWND hWnd, UINT uiMsg)
 {
 	HART_RESULT_ENUM		Result;
 	BYTE						bCommand0ReceiveBuffer[100];
@@ -34,6 +34,9 @@ void C_Engine::SendCommand(WORD wCommand, void *pvAdditionalBuffer, BYTE bAdditi
 	UINT						uiRetry;
 
 	Result = HR_SUCCESS;
+
+	// set short / polling address
+	HART.bShortAddress = bShortAddress;
 
 	// open HART
 	if (HART.IsOpen() == FALSE)
@@ -49,7 +52,7 @@ void C_Engine::SendCommand(WORD wCommand, void *pvAdditionalBuffer, BYTE bAdditi
 		{
 			if (wCommand != 0)
 			{
-				// send command 0 to get device address
+				// send command 0 to get long device address
 				for (uiRetry = 0; uiRetry < 3; uiRetry++)
 				{
 					uiCommand0ReceiveBufferLength = sizeof(bCommand0ReceiveBuffer);
@@ -69,7 +72,7 @@ void C_Engine::SendCommand(WORD wCommand, void *pvAdditionalBuffer, BYTE bAdditi
 		PostMessage(hWnd, uiMsg, Result, 0);
 }
 
-BOOL C_Engine::SendCommandAsync(WORD wCommand, void *pvAdditionalBuffer, BYTE bAdditionalBufferLength, void *pvReceiveBuffer, UINT *puiReceiveBufferLength, HWND hWnd, UINT uiMsg)
+BOOL C_Engine::SendCommandAsync(BYTE bShortAddress, WORD wCommand, void *pvAdditionalBuffer, BYTE bAdditionalBufferLength, void *pvReceiveBuffer, UINT *puiReceiveBufferLength, HWND hWnd, UINT uiMsg)
 {
 	C_EngineRequest					*pEngineRequest;
 
@@ -77,6 +80,7 @@ BOOL C_Engine::SendCommandAsync(WORD wCommand, void *pvAdditionalBuffer, BYTE bA
 		return FALSE;
 
 	pEngineRequest->Type = ERT_SEND_COMMAND;
+	pEngineRequest->bShortAddress = bShortAddress;
 	pEngineRequest->wCommand = wCommand;
 	memcpy(pEngineRequest->bAdditionalBuffer, pvAdditionalBuffer, bAdditionalBufferLength);
 	pEngineRequest->bAdditionalBufferLength = bAdditionalBufferLength;
@@ -117,7 +121,7 @@ BOOL C_Engine::ThreadEngineCallback(THREAD_ENGINE_CALLBACK_RESON_ENUM Reason, _C
 				switch (pEngineRequest->Type)
 				{
 					case ERT_SEND_COMMAND:
-						pThis->SendCommand(pEngineRequest->wCommand, pEngineRequest->bAdditionalBuffer, pEngineRequest->bAdditionalBufferLength, pEngineRequest->pvReceiveBuffer, pEngineRequest->puiReceiveBufferLength, pEngineRequest->hWnd, pEngineRequest->uiMsg);
+						pThis->SendCommand(pEngineRequest->bShortAddress, pEngineRequest->wCommand, pEngineRequest->bAdditionalBuffer, pEngineRequest->bAdditionalBufferLength, pEngineRequest->pvReceiveBuffer, pEngineRequest->puiReceiveBufferLength, pEngineRequest->hWnd, pEngineRequest->uiMsg);
 						break;
 				}
 			}

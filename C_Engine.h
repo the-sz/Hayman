@@ -11,6 +11,7 @@ class C_EngineRequest : public _C_ThreadEngineRequest
 {
 	public:
 		ENGINE_REQUEST_TYPE_ENUM					Type;
+		BYTE												bShortAddress;
 		WORD												wCommand;
 		BYTE												bAdditionalBuffer[HART_MAX_REQUEST_BYTES];
 		BYTE												bAdditionalBufferLength;
@@ -35,8 +36,8 @@ class C_Engine
 		void DeInit(void);
 		void Close(void);
 
-		BOOL SendCommandAsync(WORD wCommand, void *pvAdditionalBuffer, BYTE bAdditionalBufferLength, void *pvReceiveBuffer, UINT *puiReceiveBufferLength, HWND hWnd, UINT uiMsg);
-		void SendCommand(WORD wCommand, void *pvAdditionalBuffer, BYTE bAdditionalBufferLength, void *pvReceiveBuffer, UINT *puiReceiveBufferLength, HWND hWnd, UINT uiMsg);
+		BOOL SendCommandAsync(BYTE bShortAddress, WORD wCommand, void *pvAdditionalBuffer, BYTE bAdditionalBufferLength, void *pvReceiveBuffer, UINT *puiReceiveBufferLength, HWND hWnd, UINT uiMsg);
+		void SendCommand(BYTE bShortAddress, WORD wCommand, void *pvAdditionalBuffer, BYTE bAdditionalBufferLength, void *pvReceiveBuffer, UINT *puiReceiveBufferLength, HWND hWnd, UINT uiMsg);
 };
 
 #endif

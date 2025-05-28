@@ -16,6 +16,7 @@ void C_Hayman::SendCommand(void)
 	BYTE									bAdditionalBufferLength;
 	BYTE									bAdditionalBuffer[HART_MAX_REQUEST_BYTES];
 	UINT									uiByte;
+	BYTE									bShortAddress;
 
 	for (;;)
 	{
@@ -25,6 +26,8 @@ void C_Hayman::SendCommand(void)
 		//
 		// get values from controls
 		//
+		bShortAddress = (BYTE)_GetItemHexOrDec(IDC_SHORT_ADDRESS);
+
 		ComboXCommand.GetText(Buffer.Get());
 		Buffer.Update();
 		_stscanf(Buffer.Get(), _T("%u"), &uiCommand);
@@ -45,7 +48,7 @@ void C_Hayman::SendCommand(void)
 		// send command async
 		//
 		uiReceiveBufferLength = sizeof(bReceiveBuffer);
-		if (Engine.SendCommandAsync((WORD)uiCommand, bAdditionalBuffer, bAdditionalBufferLength, bReceiveBuffer, &uiReceiveBufferLength, hWnd, USR_UPDATE_RESPONSE) == FALSE)
+		if (Engine.SendCommandAsync(bShortAddress, (WORD)uiCommand, bAdditionalBuffer, bAdditionalBufferLength, bReceiveBuffer, &uiReceiveBufferLength, hWnd, USR_UPDATE_RESPONSE) == FALSE)
 			break;
 
 		return;
@@ -945,6 +948,7 @@ BOOL C_Hayman::_Handle_Init(void)
 	INT_PTR								iIndex;
 	_C_CommandLine						CommandLine;
 	_C_Language							Language;
+	BYTE									bShortAddress;
 
 	_SetAppIcon(IDI_APP);
 	_SetAppWindowText(Resources.GetVersionTitlebar(APP_NAME, hInstance, NULL));
@@ -970,6 +974,10 @@ BOOL C_Hayman::_Handle_Init(void)
 
 	Settings.Init(_C_SETTINGS_USE_REGISTRY, REGISTRY_KEY, REGISTRY_SUB_KEY);
 	uiFlags = (UINT)Settings.GetDWORD(_T("Flags"), FLAG_AUTO_START | FLAG_AUTO_UPDATE);
+
+	bShortAddress = (BYTE)Settings.GetDWORD(_T("ShortAddress"), 0x80);
+	Buffer.Printf(_T("0x%02X"), bShortAddress);
+	_SetItemText(IDC_SHORT_ADDRESS, Buffer.Get());
 
 	uiRefresh = (UINT)Settings.GetDWORD(_T("Refresh"), 1000);
 	Settings.GetString(_T("SerialPort"), &SerialPort, SERIAL_PORT_USE_LAST_DEVICE);
@@ -1055,10 +1063,11 @@ BOOL C_Hayman::_Handle_Init(void)
 	Rebar.AddBand(ToolBar.hWnd, ToolBar.GetWidth(), ToolBar.GetWidth(), ToolBar.GetHeight(), 0);
 	Rebar.AddBand(Link.hwndControl, Link.GetSize()->cx + (UINT)(20 * _C_HDC::GetDpiFactor(hWnd)), Link.GetSize()->cx + (UINT)(20 * _C_HDC::GetDpiFactor(hWnd)), Link.GetSize()->cy, 1, RBBS_CHILDEDGE | RBBS_NOGRIPPER | RBBS_FIXEDSIZE);
 
+	_SetItemText(IDC_SHORT_ADDRESS_INFO, Hayman.StringTable.GetStringEx(IDS_SHORT_ADDRESS));
 	_SetItemText(IDC_COMMAND_INFO, Hayman.StringTable.GetStringEx(IDS_COMMAND));
 	_SetItemText(IDC_PAYLOAD_INFO, Hayman.StringTable.GetStringEx(IDS_PAYLOAD));
 
-	_SetMinSize(400, 150, TRUE);
+	_SetMinSize(500, 150, TRUE);
 
 	AlignContainer.Add(_GetItemHwnd(IDC_LIST_VIEW), ALIGN_WIDTH_FILL | ALIGN_HEIGHT_FILL);
 	AlignContainer.Add(_GetItemHwnd(IDC_COMBO_PAYLOAD), ALIGN_WIDTH_FILL);
@@ -1101,6 +1110,8 @@ BOOL C_Hayman::_Handle_Exit(INT_PTR iResult)
 	if (Buffer.GetLength() > 0)
 		MRUPayload.Add(Buffer.Get());
 	MRUPayload.DeInit();
+
+	Settings.SetDWORD(_T("ShortAddress"), _GetItemHexOrDec(IDC_SHORT_ADDRESS));
 
 	Settings.SetDWORD(_T("Refresh"), uiRefresh);
 

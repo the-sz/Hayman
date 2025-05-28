@@ -38,6 +38,7 @@
 #define IDS_ERROR_CHECKSUM_FAILED       66
 #define IDS_ERROR_LONG_ADDRESS_NOT_KNOWN 67
 #define IDS_ERROR_PACKET_TOO_LONG       68
+#define IDS_SHORT_ADDRESS               69
 #define IDI_APP                         101
 #define IDD_MAIN                        102
 #define IDD_OPTIONS                     104
@@ -71,11 +72,13 @@
 #define IDC_ERROR_ICON                  1018
 #define IDC_INFO_ICON                   1019
 #define IDC_COMMAND_INFO                1025
+#define IDC_SHORT_ADDRESS_INFO          1026
 #define IDC_PAYLOAD_INFO                1027
 #define IDC_DEVICE_LIST_INFO            1028
 #define IDC_REFRESH_RATE_MS             1033
 #define IDC_REFRESH_RATE_INFO           1034
 #define IDC_COMBO_PAYLOAD               1035
+#define IDC_SHORT_ADDRESS               1036
 
 // Next default values for new objects
 // 
@@ -83,7 +86,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        140
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1036
+#define _APS_NEXT_CONTROL_VALUE         1037
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

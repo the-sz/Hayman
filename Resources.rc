@@ -88,7 +88,7 @@ END
 
 3 TEXTINCLUDE DISCARDABLE 
 BEGIN
-    "\r\n"
+    "#include ""Resources.rc2""\r\n"
     "\0"
 END
 
@@ -106,12 +106,15 @@ STYLE DS_CENTER | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP |
 CAPTION "Dialog"
 FONT 8, "MS Sans Serif"
 BEGIN
-    LTEXT           "Command",IDC_COMMAND_INFO,5,25,35,12,SS_CENTERIMAGE
-    COMBOBOX        IDC_COMBO_COMMAND,45,25,200,366,CBS_DROPDOWN | 
+    LTEXT           "Short / Polling Address",IDC_SHORT_ADDRESS_INFO,5,25,85,
+                    12,SS_CENTERIMAGE
+    EDITTEXT        IDC_SHORT_ADDRESS,95,24,40,14,ES_AUTOHSCROLL
+    LTEXT           "Command",IDC_COMMAND_INFO,145,25,35,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_COMBO_COMMAND,185,25,200,366,CBS_DROPDOWN | 
                     CBS_OWNERDRAWVARIABLE | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "Payload",IDC_PAYLOAD_INFO,255,25,35,12,SS_CENTERIMAGE
-    COMBOBOX        IDC_COMBO_PAYLOAD,295,25,225,366,CBS_DROPDOWN | 
+    LTEXT           "Payload",IDC_PAYLOAD_INFO,395,25,35,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_COMBO_PAYLOAD,435,25,85,366,CBS_DROPDOWN | 
                     CBS_OWNERDRAWVARIABLE | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "List1",IDC_LIST_VIEW,"SysListView32",LVS_REPORT | 
@@ -130,7 +133,7 @@ FONT 8, "MS Sans Serif"
 BEGIN
     LTEXT           "Serial Port",IDC_DEVICE_LIST_INFO,10,10,52,14,
                     SS_CENTERIMAGE
-    COMBOBOX        IDC_DEVICE_LIST,80,10,185,112,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_DEVICE_LIST,80,10,185,255,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWVARIABLE | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Refresh Rate",IDC_REFRESH_RATE_INFO,10,35,65,14,
@@ -272,6 +275,7 @@ BEGIN
     IDS_ERROR_CHECKSUM_FAILED "Prüfsumme falsch"
     IDS_ERROR_LONG_ADDRESS_NOT_KNOWN "Long address unbekannt"
     IDS_ERROR_PACKET_TOO_LONG "Paket zu lang"
+    IDS_SHORT_ADDRESS       "Kurze / Polling Adresse"
 END
 
 #endif    // German (Germany) resources
@@ -345,6 +349,7 @@ BEGIN
     IDS_ERROR_CHECKSUM_FAILED "Checksum wrong"
     IDS_ERROR_LONG_ADDRESS_NOT_KNOWN "Long address not known"
     IDS_ERROR_PACKET_TOO_LONG "Packet too long"
+    IDS_SHORT_ADDRESS       "Short / Polling Address"
 END
 
 #endif    // English (U.K.) resources
@@ -357,7 +362,7 @@ END
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
+#include "Resources.rc2"
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED

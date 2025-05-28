@@ -528,6 +528,10 @@ SOURCE=.\Resources.rc
 # End Source File
 # Begin Source File
 
+SOURCE=.\Resources.rc2
+# End Source File
+# Begin Source File
+
 SOURCE=.\_Resources\Save.ico
 # End Source File
 # Begin Source File

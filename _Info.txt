@@ -1,3 +1,7 @@
 HART viewer
 
 /l en		select ui language http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
+
+*** Translations:
+
+Greek:											admin@geogeo.gr
