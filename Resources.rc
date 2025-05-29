@@ -29,8 +29,8 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,1,1
- PRODUCTVERSION 1,0,1,1
+ FILEVERSION 1,0,2,1
+ PRODUCTVERSION 1,0,2,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x21L
@@ -48,14 +48,14 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "the sz development\0"
             VALUE "FileDescription", "Hayman\0"
-            VALUE "FileVersion", "1.01\0"
+            VALUE "FileVersion", "1.02\0"
             VALUE "InternalName", "Hayman\0"
             VALUE "LegalCopyright", "Copyright © 2025\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "Hayman.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "the sz development Hayman\0"
-            VALUE "ProductVersion", "1.01\0"
+            VALUE "ProductVersion", "1.02\0"
             VALUE "SpecialBuild", "The SZ\0"
         END
     END
@@ -106,15 +106,15 @@ STYLE DS_CENTER | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP |
 CAPTION "Dialog"
 FONT 8, "MS Sans Serif"
 BEGIN
-    LTEXT           "Short / Polling Address",IDC_SHORT_ADDRESS_INFO,5,25,85,
-                    12,SS_CENTERIMAGE
-    EDITTEXT        IDC_SHORT_ADDRESS,95,24,40,14,ES_AUTOHSCROLL
-    LTEXT           "Command",IDC_COMMAND_INFO,145,25,35,12,SS_CENTERIMAGE
-    COMBOBOX        IDC_COMBO_COMMAND,185,25,200,366,CBS_DROPDOWN | 
+    LTEXT           "Short / Polling Address",IDC_SHORT_ADDRESS_INFO,5,25,
+                    105,12,SS_CENTERIMAGE
+    EDITTEXT        IDC_SHORT_ADDRESS,115,24,40,14,ES_AUTOHSCROLL
+    LTEXT           "Command",IDC_COMMAND_INFO,165,25,35,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_COMBO_COMMAND,205,25,200,366,CBS_DROPDOWN | 
                     CBS_OWNERDRAWVARIABLE | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "Payload",IDC_PAYLOAD_INFO,395,25,35,12,SS_CENTERIMAGE
-    COMBOBOX        IDC_COMBO_PAYLOAD,435,25,85,366,CBS_DROPDOWN | 
+    LTEXT           "Payload",IDC_PAYLOAD_INFO,415,25,35,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_COMBO_PAYLOAD,455,25,65,366,CBS_DROPDOWN | 
                     CBS_OWNERDRAWVARIABLE | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "List1",IDC_LIST_VIEW,"SysListView32",LVS_REPORT | 
