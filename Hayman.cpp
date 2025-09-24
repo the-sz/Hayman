@@ -355,10 +355,10 @@ void C_Hayman::DecodePayloadCommand3(UINT uiOffset)
 
 	if ((uiOffset + (1 + 4)) <= (uiReceiveBufferLength - 1))
 	{
-		Buffer.Printf(_T("%.1f"), DecodeFloat(&bReceiveBuffer[uiOffset + 5]));
+		Buffer.Printf(_T("%.1f"), DecodeFloat(&bReceiveBuffer[uiOffset + 1]));
 		ListViewAdd(_T("Secondary Variable"), Buffer.Get(), 1);
 
-		Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset + 4]);
+		Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset + 0]);
 		ListViewAdd(_T("Secondary Variable Unit Code"), Buffer.Get(), 1);
 
 		uiOffset += (1 + 4);
@@ -366,10 +366,10 @@ void C_Hayman::DecodePayloadCommand3(UINT uiOffset)
 
 	if ((uiOffset + (1 + 4)) <= (uiReceiveBufferLength - 1))
 	{
-		Buffer.Printf(_T("%.1f"), DecodeFloat(&bReceiveBuffer[uiOffset + 5]));
+		Buffer.Printf(_T("%.1f"), DecodeFloat(&bReceiveBuffer[uiOffset + 1]));
 		ListViewAdd(_T("Tertiary Variable"), Buffer.Get(), 1);
 
-		Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset + 4]);
+		Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset + 0]);
 		ListViewAdd(_T("Tertiary Variable Unit Code"), Buffer.Get(), 1);
 
 		uiOffset += (1 + 4);
@@ -377,10 +377,10 @@ void C_Hayman::DecodePayloadCommand3(UINT uiOffset)
 
 	if ((uiOffset + (1 + 4)) <= (uiReceiveBufferLength - 1))
 	{
-		Buffer.Printf(_T("%.1f"), DecodeFloat(&bReceiveBuffer[uiOffset + 5]));
+		Buffer.Printf(_T("%.1f"), DecodeFloat(&bReceiveBuffer[uiOffset + 1]));
 		ListViewAdd(_T("Quaternary Variable"), Buffer.Get(), 1);
 
-		Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset + 4]);
+		Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset + 0]);
 		ListViewAdd(_T("Quaternary Variable Unit Code"), Buffer.Get(), 1);
 
 		uiOffset += (1 + 4);
