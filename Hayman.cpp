@@ -250,7 +250,55 @@ void C_Hayman::DecodeDeviceVariableClassificationCode(BYTE bDeviceVariableClassi
 
 	switch (bDeviceVariableClassificationCode)
 	{
-		case 0:		pszDeviceVariableClassificationCode = _T("Device Variable Not Classified");						break;
+		case 0:		pszDeviceVariableClassificationCode = _T("Device Variable Not Classified");				break;
+		case 64:		pszDeviceVariableClassificationCode = _T("Temperature");											break;
+		case 65:		pszDeviceVariableClassificationCode = _T("Pressure");												break;
+		case 66:		pszDeviceVariableClassificationCode = _T("Volumetric Flow");									break;
+		case 67:		pszDeviceVariableClassificationCode = _T("Velocity");												break;
+		case 68:		pszDeviceVariableClassificationCode = _T("Volume");												break;
+		case 69:		pszDeviceVariableClassificationCode = _T("Length");												break;
+		case 70:		pszDeviceVariableClassificationCode = _T("Time");													break;
+		case 71:		pszDeviceVariableClassificationCode = _T("Mass");													break;
+		case 72:		pszDeviceVariableClassificationCode = _T("Mass Flow");											break;
+		case 73:		pszDeviceVariableClassificationCode = _T("Mass Per Volume");									break;
+		case 74:		pszDeviceVariableClassificationCode = _T("Viscosity");											break;
+		case 75:		pszDeviceVariableClassificationCode = _T("Angular Velocity");									break;
+		case 76:		pszDeviceVariableClassificationCode = _T("Area");													break;
+		case 77:		pszDeviceVariableClassificationCode = _T("Energy (Work)");										break;
+		case 78:		pszDeviceVariableClassificationCode = _T("Force");													break;
+		case 79:		pszDeviceVariableClassificationCode = _T("Power");													break;
+		case 80:		pszDeviceVariableClassificationCode = _T("Frequency");											break;
+		case 81:		pszDeviceVariableClassificationCode = _T("Analytical");											break;
+		case 82:		pszDeviceVariableClassificationCode = _T("Capacitance");											break;
+		case 83:		pszDeviceVariableClassificationCode = _T("Electromotive Force/Electic Potential");		break;
+		case 84:		pszDeviceVariableClassificationCode = _T("Current");												break;
+		case 85:		pszDeviceVariableClassificationCode = _T("Resistance");											break;
+		case 86:		pszDeviceVariableClassificationCode = _T("Angle");													break;
+		case 87:		pszDeviceVariableClassificationCode = _T("Conductance");											break;
+		case 88:		pszDeviceVariableClassificationCode = _T("Volume Per Volume");									break;
+		case 89:		pszDeviceVariableClassificationCode = _T("Volume Per Mass");									break;
+		case 90:		pszDeviceVariableClassificationCode = _T("Concentration");										break;
+		case 91:		pszDeviceVariableClassificationCode = _T("Reserved");												break;
+		case 92:		pszDeviceVariableClassificationCode = _T("Reserved");												break;
+		case 93:		pszDeviceVariableClassificationCode = _T("Reserved");												break;
+		case 94:		pszDeviceVariableClassificationCode = _T("Reserved");												break;
+		case 95:		pszDeviceVariableClassificationCode = _T("Reserved");												break;
+		case 96:		pszDeviceVariableClassificationCode = _T("Acceleration");										break;
+		case 97:		pszDeviceVariableClassificationCode = _T("Turbidity");											break;
+		case 98:		pszDeviceVariableClassificationCode = _T("Temperature Difference");							break;
+		case 99:		pszDeviceVariableClassificationCode = _T("Volumetric Gas Flow (per Second)");				break;
+		case 100:	pszDeviceVariableClassificationCode = _T("Volumetric Gas Flow (per Minute)");				break;
+		case 101:	pszDeviceVariableClassificationCode = _T("Volumetric Gas Flow (per Hour)");				break;
+		case 102:	pszDeviceVariableClassificationCode = _T("Volumetric Gas Flow (per Day)");					break;
+		case 103:	pszDeviceVariableClassificationCode = _T("Volumetric Liquid Flow (per Second)");			break;
+		case 104:	pszDeviceVariableClassificationCode = _T("Volumetric Liquid Flow (per Minute)");			break;
+		case 105:	pszDeviceVariableClassificationCode = _T("Volumetric Liquid Flow (per Hour)");			break;
+		case 106:	pszDeviceVariableClassificationCode = _T("Volumetric Liquid Flow (per Day)");				break;
+		case 107:	pszDeviceVariableClassificationCode = _T("Thermal Expansion");									break;
+		case 108:	pszDeviceVariableClassificationCode = _T("Volumetric Energy Density");						break;
+		case 109:	pszDeviceVariableClassificationCode = _T("Mass Energy Density");								break;
+		case 110:	pszDeviceVariableClassificationCode = _T("Torque");												break;
+		case 111:	pszDeviceVariableClassificationCode = _T("Miscellaneous");										break;
 	}
 
 	if (pszDeviceVariableClassificationCode != NULL)
