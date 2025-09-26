@@ -67,6 +67,18 @@ FLOAT C_Hayman::DecodeFloat(BYTE *pbBuffer)
 	return *(FLOAT *)&bArray;
 }
 
+DWORD C_Hayman::DecodeDWord(BYTE *pbBuffer)
+{
+	BYTE									bArray[4];
+
+	bArray[0] = pbBuffer[3];
+	bArray[1] = pbBuffer[2];
+	bArray[2] = pbBuffer[1];
+	bArray[3] = pbBuffer[0];
+
+	return *(DWORD *)&bArray;
+}
+
 void C_Hayman::DecodePackedString(BYTE *pbBuffer, _C_String *pString)
 {
 	const CHAR			cPackedAscii[64] = { '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '[', '\\', ']', '^', '_', ' ', '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?' };
@@ -88,6 +100,23 @@ void C_Hayman::DecodePackedString(BYTE *pbBuffer, _C_String *pString)
 
 	bValue = (BYTE)(pbBuffer[2] & 0x3F);
 	pString->Add(cPackedAscii[bValue]);
+}
+
+void C_Hayman::DumpBuffer(BYTE *pbBuffer, UINT uiLength, _C_String *pString)
+{
+	_C_String				Temp;
+	UINT						uiIndex;
+
+	pString->Set(_T(""));
+
+	for (uiIndex = 0; uiIndex < uiLength; uiIndex++)
+	{
+		if (((uiIndex % 8) == 0) && (uiIndex != 0))
+			pString->Add(_T(" |"));
+
+		Temp.Printf(_T("0x%02X"), pbBuffer[uiIndex]);
+		pString->AddWithDelimiter(Temp.Get(), _T(" "));
+	}
 }
 
 void C_Hayman::DecodeManufacturerAndDevice(WORD wManufacturer, WORD wDeviceType, _C_String *pManufacturer, _C_String *pDeviceType)
@@ -180,6 +209,7 @@ void C_Hayman::DecodeCommand(WORD wCommand, _C_String *pCommand)
 			case 48:		pszCommand = _T("Read Additional Device Status");							break;
 
 			// Spec151.pdf
+			case 54:		pszCommand = _T("Read Device Variable Information");						break;
 			case 72:		pszCommand = _T("Squawk");															break;
 		}
 	}
@@ -209,6 +239,45 @@ void C_Hayman::DecodeResponseCode(BYTE bResponseCode, _C_String *pResponseCode)
 		pResponseCode->Printf(_T("%u - %s"), bResponseCode, pszResponseCode);
 	else
 		pResponseCode->Printf(_T("%u"), bResponseCode);
+}
+
+// Spec183.pdf page 84
+void C_Hayman::DecodeDeviceVariableClassificationCode(BYTE bDeviceVariableClassificationCode, _C_String *pDeviceVariableClassificationCode)
+{
+	TCHAR				*pszDeviceVariableClassificationCode;
+
+	pszDeviceVariableClassificationCode = NULL;
+
+	switch (bDeviceVariableClassificationCode)
+	{
+		case 0:		pszDeviceVariableClassificationCode = _T("Device Variable Not Classified");						break;
+	}
+
+	if (pszDeviceVariableClassificationCode != NULL)
+		pDeviceVariableClassificationCode->Printf(_T("%u - %s"), bDeviceVariableClassificationCode, pszDeviceVariableClassificationCode);
+	else
+		pDeviceVariableClassificationCode->Printf(_T("%u"), bDeviceVariableClassificationCode);
+}
+
+// Spec183.pdf page 51
+void C_Hayman::DecodeUnitCode(BYTE bUnitCode, _C_String *pUnitCode)
+{
+	TCHAR				*pszUnitCode;
+
+	pszUnitCode = NULL;
+
+	switch (bUnitCode)
+	{
+		case 250:	pszUnitCode = _T("Not Used");														break;
+		case 251:	pszUnitCode = _T("None");															break;
+		case 252:	pszUnitCode = _T("Unknown");														break;
+		case 253:	pszUnitCode = _T("Special");														break;
+	}
+
+	if (pszUnitCode != NULL)
+		pUnitCode->Printf(_T("%u - %s"), bUnitCode, pszUnitCode);
+	else
+		pUnitCode->Printf(_T("%u"), bUnitCode);
 }
 
 void C_Hayman::DecodePayloadCommandUnknown(UINT uiOffset)
@@ -347,7 +416,7 @@ void C_Hayman::DecodePayloadCommand3(UINT uiOffset)
 		Buffer.Printf(_T("%.1f"), DecodeFloat(&bReceiveBuffer[uiOffset + 5]));
 		ListViewAdd(_T("Primary Variable"), Buffer.Get(), 1);
 
-		Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset + 4]);
+		DecodeUnitCode(bReceiveBuffer[uiOffset + 4], &Buffer);
 		ListViewAdd(_T("Primary Variable Unit Code"), Buffer.Get(), 1);
 
 		uiOffset += (4 + 1 + 4);
@@ -358,7 +427,7 @@ void C_Hayman::DecodePayloadCommand3(UINT uiOffset)
 		Buffer.Printf(_T("%.1f"), DecodeFloat(&bReceiveBuffer[uiOffset + 1]));
 		ListViewAdd(_T("Secondary Variable"), Buffer.Get(), 1);
 
-		Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset + 0]);
+		DecodeUnitCode(bReceiveBuffer[uiOffset + 0], &Buffer);
 		ListViewAdd(_T("Secondary Variable Unit Code"), Buffer.Get(), 1);
 
 		uiOffset += (1 + 4);
@@ -369,7 +438,7 @@ void C_Hayman::DecodePayloadCommand3(UINT uiOffset)
 		Buffer.Printf(_T("%.1f"), DecodeFloat(&bReceiveBuffer[uiOffset + 1]));
 		ListViewAdd(_T("Tertiary Variable"), Buffer.Get(), 1);
 
-		Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset + 0]);
+		DecodeUnitCode(bReceiveBuffer[uiOffset + 0], &Buffer);
 		ListViewAdd(_T("Tertiary Variable Unit Code"), Buffer.Get(), 1);
 
 		uiOffset += (1 + 4);
@@ -380,10 +449,51 @@ void C_Hayman::DecodePayloadCommand3(UINT uiOffset)
 		Buffer.Printf(_T("%.1f"), DecodeFloat(&bReceiveBuffer[uiOffset + 1]));
 		ListViewAdd(_T("Quaternary Variable"), Buffer.Get(), 1);
 
-		Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset + 0]);
+		DecodeUnitCode(bReceiveBuffer[uiOffset + 0], &Buffer);
 		ListViewAdd(_T("Quaternary Variable Unit Code"), Buffer.Get(), 1);
 
 		uiOffset += (1 + 4);
+	}
+}
+
+// Spec127.pdf page 21
+void C_Hayman::DecodePayloadCommand7(UINT uiOffset)
+{
+	_C_String							Buffer;
+
+	if ((uiOffset + 2) <= (uiReceiveBufferLength - 1))
+	{
+		Buffer.Printf(_T("0x%02X"), bReceiveBuffer[uiOffset + 0]);
+		ListViewAdd(_T("Polling Address"), Buffer.Get(), 1);
+
+		switch (bReceiveBuffer[uiOffset + 1])
+		{
+			case 0:		Buffer = _T("0 - Disabled");											break;
+			case 1:		Buffer = _T("1 - Enabled");											break;
+			default:		Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset + 1]);		break;
+		}
+		ListViewAdd(_T("Loop Current Mode"), Buffer.Get(), 1);
+	}
+}
+
+// Spec127.pdf page 22
+void C_Hayman::DecodePayloadCommand8(UINT uiOffset)
+{
+	_C_String							Buffer;
+
+	if ((uiOffset + 4) <= (uiReceiveBufferLength - 1))
+	{
+		DecodeDeviceVariableClassificationCode(bReceiveBuffer[uiOffset + 0], &Buffer);
+		ListViewAdd(_T("Primary Variable Classification"), Buffer.Get(), 1);
+
+		DecodeDeviceVariableClassificationCode(bReceiveBuffer[uiOffset + 1], &Buffer);
+		ListViewAdd(_T("Secondary Variable Classification"), Buffer.Get(), 1);
+
+		DecodeDeviceVariableClassificationCode(bReceiveBuffer[uiOffset + 2], &Buffer);
+		ListViewAdd(_T("Tertiary Variable Classification"), Buffer.Get(), 1);
+
+		DecodeDeviceVariableClassificationCode(bReceiveBuffer[uiOffset + 3], &Buffer);
+		ListViewAdd(_T("Quaternary Variable Classification"), Buffer.Get(), 1);
 	}
 }
 
@@ -408,11 +518,52 @@ void C_Hayman::DecodePayloadCommand13(UINT uiOffset)
 	ListViewAdd(_T("Date"), Buffer.Get(), 1);
 }
 
+// Spec151.pdf page 61
+void C_Hayman::DecodePayloadCommand54(UINT uiOffset)
+{
+	_C_String							Buffer;
+
+	if ((uiOffset + 28) <= (uiReceiveBufferLength - 1))
+	{
+		Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset + 0]);
+		ListViewAdd(_T("Device Variable Code"), Buffer.Get(), 1);
+
+		Buffer.Printf(_T("0x%02X 0x%02X 0x%02X"), bReceiveBuffer[uiOffset + 1], bReceiveBuffer[uiOffset + 2], bReceiveBuffer[uiOffset + 3]);
+		ListViewAdd(_T("Device Variable Transducer Serial Number"), Buffer.Get(), 1);
+
+		Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset + 4]);
+		ListViewAdd(_T("Device Variable Limits / Span Units Code"), Buffer.Get(), 1);
+
+		Buffer.Printf(_T("%.1f"), DecodeFloat(&bReceiveBuffer[uiOffset + 5]));
+		ListViewAdd(_T("Device Variable Upper Transducer Limit"), Buffer.Get(), 1);
+
+		Buffer.Printf(_T("%.1f"), DecodeFloat(&bReceiveBuffer[uiOffset + 9]));
+		ListViewAdd(_T("Device Variable Lower Transducer Limit"), Buffer.Get(), 1);
+
+		Buffer.Printf(_T("%.1f"), DecodeFloat(&bReceiveBuffer[uiOffset + 13]));
+		ListViewAdd(_T("Device Variable Damping Value"), Buffer.Get(), 1);
+
+		Buffer.Printf(_T("%.1f"), DecodeFloat(&bReceiveBuffer[uiOffset + 17]));
+		ListViewAdd(_T("Device Variable Minimum Span"), Buffer.Get(), 1);
+
+		Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset + 21]);
+		ListViewAdd(_T("Device Variable Classification"), Buffer.Get(), 1);
+
+		Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset + 22]);
+		ListViewAdd(_T("Device Variable Family"), Buffer.Get(), 1);
+
+		Buffer.Printf(_T("%u"), DecodeDWord(&bReceiveBuffer[uiOffset + 23]));
+		ListViewAdd(_T("Acquisition Period"), Buffer.Get(), 1);
+
+		Buffer.Printf(_T("%u"), bReceiveBuffer[uiOffset + 27]);
+		ListViewAdd(_T("Device Variable Properties"), Buffer.Get(), 1);
+	}
+}
+
 void C_Hayman::UpdateResponse(HART_RESULT_ENUM Result)
 {
 	_C_String							Buffer;
 	_C_String							Temp;
-	UINT									uiIndex;
 	INT									iSelectedItem;
 	UINT									uiOffset;
 	BYTE									bCommand;
@@ -427,15 +578,7 @@ void C_Hayman::UpdateResponse(HART_RESULT_ENUM Result)
 	ListView.DeleteAllItems();
 
 	// received buffer
-	Buffer = _T("");
-	for (uiIndex = 0; uiIndex < uiReceiveBufferLength; uiIndex++)
-	{
-		if (((uiIndex % 8) == 0) && (uiIndex != 0))
-			Buffer.Add(_T(" |"));
-
-		Temp.Printf(_T("0x%02X"), bReceiveBuffer[uiIndex]);
-		Buffer.AddWithDelimiter(Temp.Get(), _T(" "));
-	}
+	DumpBuffer(&bReceiveBuffer[0], uiReceiveBufferLength, &Buffer);
 	if (Buffer.GetLength() != 0)
 		ListViewAdd(_T("Received"), Buffer.Get(), ((Result == HR_SUCCESS) ? 0 : 2));
 
@@ -510,15 +653,7 @@ void C_Hayman::UpdateResponse(HART_RESULT_ENUM Result)
 		uiOffset++;
 
 		// real payload
-		Buffer = _T("");
-		for (uiIndex = uiOffset; uiIndex < (uiReceiveBufferLength - 1); uiIndex++)
-		{
-			if (((uiIndex % 8) == 0) && (uiIndex != 0))
-				Buffer.Add(_T(" |"));
-
-			Temp.Printf(_T("0x%02X"), bReceiveBuffer[uiIndex]);
-			Buffer.AddWithDelimiter(Temp.Get(), _T(" "));
-		}
+		DumpBuffer(&bReceiveBuffer[uiOffset], (uiReceiveBufferLength - uiOffset - 1), &Buffer);
 		if (Buffer.GetLength() != 0)
 			ListViewAdd(_T("Payload"), Buffer.Get(), 3);
 
@@ -528,7 +663,10 @@ void C_Hayman::UpdateResponse(HART_RESULT_ENUM Result)
 			case 1:		DecodePayloadCommand1(uiOffset);				break;
 			case 2:		DecodePayloadCommand2(uiOffset);				break;
 			case 3:		DecodePayloadCommand3(uiOffset);				break;
+			case 7:		DecodePayloadCommand7(uiOffset);				break;
+			case 8:		DecodePayloadCommand8(uiOffset);				break;
 			case 13:		DecodePayloadCommand13(uiOffset);			break;
+			case 54:		DecodePayloadCommand54(uiOffset);			break;
 			default:		DecodePayloadCommandUnknown(uiOffset);		break;
 		}
 	}
@@ -923,6 +1061,8 @@ void C_Hayman::CommandNameInit(void)
 	DecodeCommand(38, &Buffer);
 	ComboXCommand.AddItem(Buffer.Get(), 0, IDI_COMMAND, NULL);
 	DecodeCommand(48, &Buffer);
+	ComboXCommand.AddItem(Buffer.Get(), 0, IDI_COMMAND, NULL);
+	DecodeCommand(54, &Buffer);
 	ComboXCommand.AddItem(Buffer.Get(), 0, IDI_COMMAND, NULL);
 	DecodeCommand(72, &Buffer);
 	ComboXCommand.AddItem(Buffer.Get(), 0, IDI_COMMAND, NULL);
