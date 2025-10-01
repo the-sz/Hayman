@@ -112,6 +112,7 @@ class C_Hayman : public _C_AppDialog
 		void DecodePayloadCommand7(UINT uiOffset);
 		void DecodePayloadCommand8(UINT uiOffset);
 		void DecodePayloadCommand13(UINT uiOffset);
+		void DecodePayloadCommand20And22(UINT uiOffset);
 		void DecodePayloadCommand54(UINT uiOffset);
 		void SetPollingButton(void);
 		void Polling(void);

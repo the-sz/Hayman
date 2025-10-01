@@ -566,6 +566,18 @@ void C_Hayman::DecodePayloadCommand13(UINT uiOffset)
 	ListViewAdd(_T("Date"), Buffer.Get(), 1);
 }
 
+// Spec127.pdf page 37
+void C_Hayman::DecodePayloadCommand20And22(UINT uiOffset)
+{
+	_C_String							Buffer;
+
+	if ((uiOffset + 32) <= (uiReceiveBufferLength - 1))
+	{
+		Buffer.Set((CHAR *)&bReceiveBuffer[uiOffset + 0], 32);
+		ListViewAdd(_T("Long Tag"), Buffer.Get(), 1);
+	}
+}
+
 // Spec151.pdf page 61
 void C_Hayman::DecodePayloadCommand54(UINT uiOffset)
 {
@@ -714,6 +726,8 @@ void C_Hayman::UpdateResponse(HART_RESULT_ENUM Result)
 			case 7:		DecodePayloadCommand7(uiOffset);				break;
 			case 8:		DecodePayloadCommand8(uiOffset);				break;
 			case 13:		DecodePayloadCommand13(uiOffset);			break;
+			case 20:		DecodePayloadCommand20And22(uiOffset);		break;
+			case 22:		DecodePayloadCommand20And22(uiOffset);		break;
 			case 54:		DecodePayloadCommand54(uiOffset);			break;
 			default:		DecodePayloadCommandUnknown(uiOffset);		break;
 		}
