@@ -29,8 +29,8 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,4,1
- PRODUCTVERSION 1,0,4,1
+ FILEVERSION 1,0,5,1
+ PRODUCTVERSION 1,0,5,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x21L
@@ -48,14 +48,14 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "the sz development\0"
             VALUE "FileDescription", "Hayman\0"
-            VALUE "FileVersion", "1.04\0"
+            VALUE "FileVersion", "1.05\0"
             VALUE "InternalName", "Hayman\0"
             VALUE "LegalCopyright", "Copyright © 2025-2026\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "Hayman.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "the sz development Hayman\0"
-            VALUE "ProductVersion", "1.04\0"
+            VALUE "ProductVersion", "1.05\0"
             VALUE "SpecialBuild", "The SZ\0"
         END
     END
@@ -115,8 +115,8 @@ BEGIN
                     WS_TABSTOP
     LTEXT           "Payload",IDC_PAYLOAD_INFO,425,25,35,12,SS_CENTERIMAGE
     COMBOBOX        IDC_COMBO_PAYLOAD,465,25,55,366,CBS_DROPDOWN | 
-                    CBS_OWNERDRAWVARIABLE | CBS_HASSTRINGS | WS_VSCROLL | 
-                    WS_TABSTOP
+                    CBS_OWNERDRAWVARIABLE | CBS_AUTOHSCROLL | CBS_HASSTRINGS | 
+                    WS_VSCROLL | WS_TABSTOP
     CONTROL         "List1",IDC_LIST_VIEW,"SysListView32",LVS_REPORT | 
                     LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,5,65,515,230
     CTEXT           "Static",IDC_LINK,320,5,71,14,SS_CENTERIMAGE
