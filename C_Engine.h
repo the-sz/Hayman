@@ -19,6 +19,7 @@ class C_EngineRequest : public _C_ThreadEngineRequest
 		UINT												*puiReceiveBufferLength;
 		HWND												hWnd;
 		UINT												uiMsg;
+		_C_Buffer<BYTE>								*pBuffer;
 };
 
 class C_Engine
@@ -36,8 +37,8 @@ class C_Engine
 		void DeInit(void);
 		void Close(void);
 
-		BOOL SendCommandAsync(BYTE bShortAddress, WORD wCommand, void *pvAdditionalBuffer, BYTE bAdditionalBufferLength, void *pvReceiveBuffer, UINT *puiReceiveBufferLength, HWND hWnd, UINT uiMsg);
-		void SendCommand(BYTE bShortAddress, WORD wCommand, void *pvAdditionalBuffer, BYTE bAdditionalBufferLength, void *pvReceiveBuffer, UINT *puiReceiveBufferLength, HWND hWnd, UINT uiMsg);
+		BOOL SendCommandAsync(BYTE bShortAddress, WORD wCommand, void *pvAdditionalBuffer, BYTE bAdditionalBufferLength, void *pvReceiveBuffer, UINT *puiReceiveBufferLength, HWND hWnd, UINT uiMsg, _C_Buffer<BYTE> *pSendBufferDebug);
+		void SendCommand(BYTE bShortAddress, WORD wCommand, void *pvAdditionalBuffer, BYTE bAdditionalBufferLength, void *pvReceiveBuffer, UINT *puiReceiveBufferLength, HWND hWnd, UINT uiMsg, _C_Buffer<BYTE> *pSendBufferDebug);
 };
 
 #endif

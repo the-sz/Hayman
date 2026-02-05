@@ -22,6 +22,7 @@
 #include <_C_ProgressBar.h>
 #include <_C_Clipboard.h>
 #include <_C_MRU.h>
+#include <_C_Buffer.h>
 #include <_C_Debug.h>
 
 #include "..\HART\_C_HART.h"
@@ -83,6 +84,7 @@ class C_Hayman : public _C_AppDialog
 		_C_Log													Log;
 		BYTE														bReceiveBuffer[100];
 		UINT														uiReceiveBufferLength;
+		_C_Buffer<BYTE>										SendBufferDebug;
 		_C_List													CommandNameList;
 
 		static BOOL ListViewCustomDraw(LPNMLVCUSTOMDRAW pNMLVCustomDraw, void *pvContext);

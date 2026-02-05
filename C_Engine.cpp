@@ -26,7 +26,7 @@ void C_Engine::Close(void)
 	HART.Close();
 }
 
-void C_Engine::SendCommand(BYTE bShortAddress, WORD wCommand, void *pvAdditionalBuffer, BYTE bAdditionalBufferLength, void *pvReceiveBuffer, UINT *puiReceiveBufferLength, HWND hWnd, UINT uiMsg)
+void C_Engine::SendCommand(BYTE bShortAddress, WORD wCommand, void *pvAdditionalBuffer, BYTE bAdditionalBufferLength, void *pvReceiveBuffer, UINT *puiReceiveBufferLength, HWND hWnd, UINT uiMsg, _C_Buffer<BYTE> *pSendBufferDebug)
 {
 	HART_RESULT_ENUM		Result;
 	BYTE						bCommand0ReceiveBuffer[100];
@@ -56,7 +56,7 @@ void C_Engine::SendCommand(BYTE bShortAddress, WORD wCommand, void *pvAdditional
 				for (uiRetry = 0; uiRetry < 3; uiRetry++)
 				{
 					uiCommand0ReceiveBufferLength = sizeof(bCommand0ReceiveBuffer);
-					if (HART.SendCommand(0, NULL, 0, bCommand0ReceiveBuffer, &uiCommand0ReceiveBufferLength) == HR_SUCCESS)
+					if (HART.SendCommand(0, NULL, 0, bCommand0ReceiveBuffer, &uiCommand0ReceiveBufferLength, pSendBufferDebug) == HR_SUCCESS)
 						break;
 				}
 			}
@@ -65,14 +65,14 @@ void C_Engine::SendCommand(BYTE bShortAddress, WORD wCommand, void *pvAdditional
 
 	// send command
 	if (Result == HR_SUCCESS)
-		Result = HART.SendCommand(wCommand, pvAdditionalBuffer, bAdditionalBufferLength, pvReceiveBuffer, puiReceiveBufferLength);
+		Result = HART.SendCommand(wCommand, pvAdditionalBuffer, bAdditionalBufferLength, pvReceiveBuffer, puiReceiveBufferLength, pSendBufferDebug);
 
 	// send result message
 	if (hWnd != NULL)
 		PostMessage(hWnd, uiMsg, Result, 0);
 }
 
-BOOL C_Engine::SendCommandAsync(BYTE bShortAddress, WORD wCommand, void *pvAdditionalBuffer, BYTE bAdditionalBufferLength, void *pvReceiveBuffer, UINT *puiReceiveBufferLength, HWND hWnd, UINT uiMsg)
+BOOL C_Engine::SendCommandAsync(BYTE bShortAddress, WORD wCommand, void *pvAdditionalBuffer, BYTE bAdditionalBufferLength, void *pvReceiveBuffer, UINT *puiReceiveBufferLength, HWND hWnd, UINT uiMsg, _C_Buffer<BYTE> *pSendBufferDebug)
 {
 	C_EngineRequest					*pEngineRequest;
 
@@ -88,6 +88,7 @@ BOOL C_Engine::SendCommandAsync(BYTE bShortAddress, WORD wCommand, void *pvAddit
 	pEngineRequest->puiReceiveBufferLength = puiReceiveBufferLength;
 	pEngineRequest->hWnd = hWnd;
 	pEngineRequest->uiMsg = uiMsg;
+	pEngineRequest->pBuffer = pSendBufferDebug;
 
 	if (ThreadEngine.Insert(pEngineRequest) == FALSE)
 	{
@@ -121,7 +122,7 @@ BOOL C_Engine::ThreadEngineCallback(THREAD_ENGINE_CALLBACK_RESON_ENUM Reason, _C
 				switch (pEngineRequest->Type)
 				{
 					case ERT_SEND_COMMAND:
-						pThis->SendCommand(pEngineRequest->bShortAddress, pEngineRequest->wCommand, pEngineRequest->bAdditionalBuffer, pEngineRequest->bAdditionalBufferLength, pEngineRequest->pvReceiveBuffer, pEngineRequest->puiReceiveBufferLength, pEngineRequest->hWnd, pEngineRequest->uiMsg);
+						pThis->SendCommand(pEngineRequest->bShortAddress, pEngineRequest->wCommand, pEngineRequest->bAdditionalBuffer, pEngineRequest->bAdditionalBufferLength, pEngineRequest->pvReceiveBuffer, pEngineRequest->puiReceiveBufferLength, pEngineRequest->hWnd, pEngineRequest->uiMsg, pEngineRequest->pBuffer);
 						break;
 				}
 			}

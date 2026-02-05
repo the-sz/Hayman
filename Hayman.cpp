@@ -48,7 +48,7 @@ void C_Hayman::SendCommand(void)
 		// send command async
 		//
 		uiReceiveBufferLength = sizeof(bReceiveBuffer);
-		if (Engine.SendCommandAsync(bShortAddress, (WORD)uiCommand, bAdditionalBuffer, bAdditionalBufferLength, bReceiveBuffer, &uiReceiveBufferLength, hWnd, USR_UPDATE_RESPONSE) == FALSE)
+		if (Engine.SendCommandAsync(bShortAddress, (WORD)uiCommand, bAdditionalBuffer, bAdditionalBufferLength, bReceiveBuffer, &uiReceiveBufferLength, hWnd, USR_UPDATE_RESPONSE, &SendBufferDebug) == FALSE)
 			break;
 
 		return;
@@ -636,6 +636,11 @@ void C_Hayman::UpdateResponse(HART_RESULT_ENUM Result)
 	ListView.Update(FALSE);
 	// reset everything
 	ListView.DeleteAllItems();
+
+	// sent buffer
+	DumpBuffer(SendBufferDebug.Pointer(), (UINT)SendBufferDebug.GetSize(), &Buffer);
+	if (Buffer.GetLength() != 0)
+		ListViewAdd(_T("Sent"), Buffer.Get(), 0);
 
 	// received buffer
 	DumpBuffer(&bReceiveBuffer[0], uiReceiveBufferLength, &Buffer);
